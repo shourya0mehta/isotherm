@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" fill="none" stroke-linecap="round" stroke-width="3.4">
+  <title>Isotherm</title>
+  <path stroke="#E2724A" d="M5 13.5C10 7 15.5 7.5 20 11.5s10 5 15-2"/>
+  <path stroke="#142029" d="M5 21.5c5.5-4 11-3.5 15.5-.5s10 3.5 14.5-1.5"/>
+  <path stroke="#5F8FC6" d="M5 29.5c6-2.5 12-1.5 16.5.5s9.5 1.5 13.5-1"/>
+</svg>

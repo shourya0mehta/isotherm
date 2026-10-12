@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Isotherm: autonomous trading for weather markets</title>
+<meta name="description" content="Isotherm forecasts the official daily high at 24 U.S. airports from free NOAA and ECMWF data, blends it with Kalshi's market prices, and trades where the price is off.">
+<meta property="og:title" content="Isotherm">
+<meta property="og:description" content="Autonomous trading for weather markets. Forecasts the official daily high at 24 U.S. airports and trades Kalshi's temperature markets on it.">
+<meta property="og:image" content="https://shourya0mehta.github.io/isotherm/assets/og.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="assets/mark.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Public+Sans:wght@400;500;600&display=swap">
+<style>
+:root {
+  --paper: #fbfcfc;
+  --ink: #142029;
+  --ink-2: #42515d;
+  --ink-3: #6b7883;
+  --rule: #dce3e8;
+  --wash: #eef2f4;
+  --link: #1c5fae;
+  --navy: #1d3b53;
+  --display: "Newsreader", Georgia, serif;
+  --body: "Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--body); font-size: 17px; line-height: 1.6;
+  font-variant-numeric: tabular-nums; }
+a { color: var(--link); text-underline-offset: 3px; text-decoration-thickness: 1px; }
+a:hover { text-decoration-thickness: 2px; }
+:focus-visible { outline: 3px solid #2a78d6; outline-offset: 3px; border-radius: 4px; }
+img { max-width: 100%; display: block; }
+.wrap { max-width: 72rem; margin: 0 auto; padding-inline: clamp(16px, 4vw, 40px); }
+
+/* top bar */
+.top { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 22px; }
+.brand { display: inline-flex; align-items: center; gap: 10px; color: var(--ink); text-decoration: none;
+  font-family: var(--display); font-weight: 600; font-size: 26px; letter-spacing: -0.01em; line-height: 1; }
+.brand img { width: 30px; height: 30px; }
+.nav { display: flex; gap: 22px; font-size: 15px; }
+.nav a { color: var(--ink-2); text-decoration: none; }
+.nav a:hover { color: var(--ink); text-decoration: underline; }
+
+/* hero */
+.hero { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 24px 48px; align-items: start;
+  padding-block: clamp(28px, 6vw, 64px) 32px; border-bottom: 2px solid var(--ink); }
+h1 { font-family: var(--display); font-weight: 500; font-size: clamp(36px, 4.4vw, 54px); line-height: 1.05;
+  letter-spacing: -0.015em; margin: 0; font-variation-settings: "opsz" 72; text-wrap: balance; }
+.lede { margin: 0; padding-top: 6px; color: var(--ink-2); max-width: 34rem; }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-top: 20px; }
+.btn { display: inline-flex; align-items: center; min-height: 44px; padding: 0 18px; border-radius: 8px;
+  font-weight: 600; font-size: 15px; text-decoration: none; border: 1.5px solid var(--navy); color: var(--navy); }
+.btn.primary { background: var(--navy); color: #fff; }
+.btn:hover { text-decoration: none; background: var(--wash); }
+.btn.primary:hover { background: #142c40; }
+.status { display: inline-flex; align-items: center; gap: 8px; font-size: 15px; color: var(--ink-2); margin-left: 6px; }
+.status::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #2f8a5b; }
+
+/* map */
+.map { margin: 0; padding-block: 28px 8px; }
+.map-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.map svg { display: block; width: 100%; min-width: 720px; height: auto; }
+.map .iso { font: 500 23px var(--body); fill: var(--ink); fill-opacity: .72; }
+.map .city { font: 500 27px var(--body); fill: var(--ink); paint-order: stroke; stroke: rgba(251, 252, 252, .88);
+  stroke-width: 7px; stroke-linejoin: round; }
+.map .city .t { font-weight: 600; }
+.map .call { stroke: var(--ink); stroke-width: 1.6; opacity: .55; }
+.map .dot { fill: var(--ink); stroke: #fff; stroke-width: 3.5; }
+.map figcaption { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px 32px; align-items: start;
+  margin-top: 14px; font-size: 14.5px; color: var(--ink-3); }
+.map figcaption p { margin: 0; max-width: 46rem; }
+.legend { display: grid; grid-template-columns: repeat(16, 18px); grid-template-rows: 12px auto; column-gap: 0; }
+.legend span { height: 12px; }
+.legend span:first-child { border-radius: 3px 0 0 3px; }
+.legend span:nth-child(16) { border-radius: 0 3px 3px 0; }
+.legend b { grid-row: 2; font-weight: 500; font-size: 12.5px; color: var(--ink-3); transform: translateX(-50%); }
+
+/* sections */
+section.block { padding-block: clamp(44px, 7vw, 80px); border-top: 1px solid var(--rule); }
+.head { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 16px 48px; align-items: start; }
+h2 { font-family: var(--display); font-weight: 500; font-size: clamp(28px, 3.4vw, 38px); line-height: 1.12;
+  letter-spacing: -0.01em; margin: 0; font-variation-settings: "opsz" 48; }
+.head p { margin: 0; color: var(--ink-2); max-width: 38rem; }
+h3 { font-size: 17px; font-weight: 600; margin: 0 0 6px; line-height: 1.35; }
+
+/* a day in the market */
+.day { list-style: none; margin: 36px 0 0; padding: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr));
+  border-top: 2px solid var(--ink); }
+.day li { position: relative; padding: 18px 18px 0 0; }
+.day li::before { content: ""; position: absolute; top: -7px; left: 0; width: 12px; height: 12px; border-radius: 50%;
+  background: var(--paper); border: 2px solid var(--ink); }
+.day li.settle::before { background: var(--ink); }
+.day time { display: block; font-family: var(--display); font-size: 21px; font-weight: 600; line-height: 1.2; margin-bottom: 6px; }
+.day p { margin: 0; font-size: 15px; color: var(--ink-2); line-height: 1.5; }
+
+/* dashboard */
+.shots { position: relative; margin: 40px 0 0; padding-right: clamp(0px, 14vw, 170px); }
+.shots .desk { border: 1px solid var(--rule); border-radius: 10px; width: 100%; height: auto; }
+.shots .phone { position: absolute; right: 0; bottom: -28px; width: clamp(150px, 24vw, 280px); height: auto;
+  border: 7px solid var(--ink); border-radius: 30px; background: var(--paper);
+  box-shadow: 0 18px 40px -18px rgba(20, 32, 41, .45); }
+.shots-cap { margin: 52px 0 0; font-size: 14.5px; color: var(--ink-3); }
+
+/* how it works */
+.steps { list-style: none; margin: 40px 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 36px 56px; counter-reset: step; }
+.steps li { counter-increment: step; display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 0 8px; }
+.steps li::before { content: counter(step); font-family: var(--display); font-size: 30px; font-weight: 500; line-height: 1;
+  color: var(--ink-3); }
+.steps p { margin: 0; color: var(--ink-2); }
+.figure { font-family: var(--display); font-size: 1.12em; line-height: 1; font-weight: 600; color: var(--ink); white-space: nowrap; }
+
+/* testing */
+.checks { list-style: none; margin: 36px 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 56px; }
+.checks li { padding: 14px 0; border-top: 1px solid var(--rule); color: var(--ink-2); }
+.checks strong { color: var(--ink); font-weight: 600; }
+
+/* stack */
+.stack { display: flex; flex-wrap: wrap; gap: 10px; list-style: none; padding: 0; margin: 28px 0 0; }
+.stack li { padding: 6px 12px; border: 1px solid var(--rule); border-radius: 6px; font-size: 15px; color: var(--ink-2); background: #fff; }
+
+footer { border-top: 2px solid var(--ink); padding-block: 28px 56px; display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 16px 48px; font-size: 15px; color: var(--ink-2); }
+footer p { margin: 0 0 8px; max-width: 36rem; }
+footer .who { text-align: right; }
+
+@media (max-width: 860px) {
+  .hero, .head, footer { grid-template-columns: minmax(0, 1fr); }
+  .day { grid-template-columns: minmax(0, 1fr); border-top: 0; border-left: 2px solid var(--ink); margin-left: 6px; }
+  .day li { padding: 0 0 22px 24px; }
+  .day li::before { top: 5px; left: -7px; }
+  .steps, .checks { grid-template-columns: minmax(0, 1fr); }
+  .map figcaption { grid-template-columns: minmax(0, 1fr); }
+  footer .who { text-align: left; }
+  .nav a.hide-sm { display: none; }
+}
+@media (max-width: 720px) {
+  .map svg { min-width: 0; }
+  .map .city, .map .iso, .map .call { display: none; }
+  .map .dot { r: 20px; stroke-width: 7px; }
+}
+@media (max-width: 560px) {
+  body { font-size: 16px; }
+  .shots { padding-right: 0; }
+  .shots .phone { position: static; width: 62%; margin: -40px 0 0 auto; }
+  .shots-cap { margin-top: 18px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="#top" aria-label="Isotherm home"><img src="assets/mark.svg" alt="">Isotherm</a>
+    <nav class="nav" aria-label="Sections">
+      <a class="hide-sm" href="#day">A day in the market</a>
+      <a class="hide-sm" href="#dashboard">Dashboard</a>
+      <a href="#how">How it works</a>
+      <a href="https://github.com/shourya0mehta/isotherm">GitHub</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero" aria-labelledby="hero-h">
+      <h1 id="hero-h">Isotherm forecasts the day&rsquo;s high temperature and trades on it.</h1>
+      <div>
+        <p class="lede">It runs around the clock on Kalshi&rsquo;s daily temperature markets at 24 U.S. airports, built entirely on
+          free NOAA and ECMWF data. Each forecast is blended with live market prices, and Isotherm only trades where the
+          price sits far enough from its estimate.</p>
+        <div class="actions">
+          <a class="btn primary" href="https://github.com/shourya0mehta/isotherm">View the code</a>
+          <a class="btn" href="#how">How it works</a>
+          <span class="status">Trading real money since October 2026</span>
+        </div>
+      </div>
+    </section>
+
+    <figure class="map" aria-labelledby="map-cap">
+      <div class="map-scroll">
+<svg viewBox="0 0 2400 1309" role="img" aria-labelledby="map-title"><title id="map-title">Map of the day's high temperature across the lower 48 states on October 11, 2026, with the official high at 24 airports: Austin 94; Dallas 91; Houston 90; Miami 90; Minneapolis 90; Oklahoma City 90; San Antonio 90; Phoenix 89; New Orleans 87; Denver 85; Chicago 78; Las Vegas 74; Los Angeles 74; San Diego 73; Atlanta 70; Washington 67; Louisville 67; Philadelphia 65; San Francisco 65; Newark 62; Trenton 61; Boston 60; New York 60; Seattle 60.</title><image href="assets/map.webp" width="2400" height="1309"/><g><text class="iso" x="628" y="254" text-anchor="middle" dominant-baseline="central" transform="rotate(-43.7 628 254)">30°</text><text class="iso" x="899" y="146" text-anchor="middle" dominant-baseline="central" transform="rotate(-39.7 899 146)">40°</text><text class="iso" x="305" y="587" text-anchor="middle" dominant-baseline="central" transform="rotate(-284.3 305 587)">50°</text><text class="iso" x="652" y="526" text-anchor="middle" dominant-baseline="central" transform="rotate(-3.6 652 526)">50°</text><text class="iso" x="223" y="232" text-anchor="middle" dominant-baseline="central" transform="rotate(-57.9 223 232)">60°</text><text class="iso" x="769" y="709" text-anchor="middle" dominant-baseline="central" transform="rotate(-318.9 769 709)">60°</text><text class="iso" x="1233" y="194" text-anchor="middle" dominant-baseline="central" transform="rotate(-56.4 1233 194)">60°</text><text class="iso" x="1978" y="240" text-anchor="middle" dominant-baseline="central" transform="rotate(-60.9 1978 240)">60°</text><text class="iso" x="1084" y="424" text-anchor="middle" dominant-baseline="central" transform="rotate(-74.3 1084 424)">70°</text><text class="iso" x="1498" y="269" text-anchor="middle" dominant-baseline="central" transform="rotate(-42.0 1498 269)">70°</text><text class="iso" x="1749" y="628" text-anchor="middle" dominant-baseline="central" transform="rotate(-50.7 1749 628)">70°</text><text class="iso" x="874" y="960" text-anchor="middle" dominant-baseline="central" transform="rotate(-326.9 874 960)">90°</text><text class="iso" x="1052" y="624" text-anchor="middle" dominant-baseline="central" transform="rotate(-45.7 1052 624)">90°</text><text class="iso" x="1112" y="1250" text-anchor="middle" dominant-baseline="central" transform="rotate(-286.4 1112 1250)">90°</text><text class="iso" x="1265" y="797" text-anchor="middle" dominant-baseline="central" transform="rotate(-343.0 1265 797)">90°</text></g><g><line class="call" x1="1990" y1="435" x2="2140" y2="405"/><line class="call" x1="1984" y1="441" x2="2140" y2="448"/><line class="call" x1="1965" y1="466" x2="2140" y2="491"/><line class="call" x1="1955" y1="489" x2="2140" y2="534"/><line class="call" x1="1900" y1="553" x2="2140" y2="577"/></g><g><circle class="dot" cx="1660" cy="856" r="8.5"/><circle class="dot" cx="1122" cy="1063" r="8.5"/><circle class="dot" cx="2073" cy="331" r="8.5"/><circle class="dot" cx="1900" cy="553" r="8.5"/><circle class="dot" cx="862" cy="581" r="8.5"/><circle class="dot" cx="1148" cy="930" r="8.5"/><circle class="dot" cx="1984" cy="441" r="8.5"/><circle class="dot" cx="1224" cy="1089" r="8.5"/><circle class="dot" cx="437" cy="708" r="8.5"/><circle class="dot" cx="289" cy="783" r="8.5"/><circle class="dot" cx="1484" cy="477" r="8.5"/><circle class="dot" cx="1897" cy="1209" r="8.5"/><circle class="dot" cx="1278" cy="341" r="8.5"/><circle class="dot" cx="1438" cy="1060" r="8.5"/><circle class="dot" cx="1990" cy="435" r="8.5"/><circle class="dot" cx="1125" cy="808" r="8.5"/><circle class="dot" cx="1955" cy="489" r="8.5"/><circle class="dot" cx="539" cy="857" r="8.5"/><circle class="dot" cx="324" cy="852" r="8.5"/><circle class="dot" cx="1088" cy="1095" r="8.5"/><circle class="dot" cx="1579" cy="643" r="8.5"/><circle class="dot" cx="310" cy="107" r="8.5"/><circle class="dot" cx="180" cy="570" r="8.5"/><circle class="dot" cx="1965" cy="466" r="8.5"/></g><g><text class="city" x="1677" y="866" text-anchor="start">Atlanta <tspan class="t">70&#176;</tspan></text><text class="city" x="1105" y="1068" text-anchor="end">Austin <tspan class="t">94&#176;</tspan></text><text class="city" x="2090" y="340" text-anchor="start">Boston <tspan class="t">60&#176;</tspan></text><text class="city" x="879" y="590" text-anchor="start">Denver <tspan class="t">85&#176;</tspan></text><text class="city" x="1165" y="939" text-anchor="start">Dallas <tspan class="t">91&#176;</tspan></text><text class="city" x="1242" y="1098" text-anchor="start">Houston <tspan class="t">90&#176;</tspan></text><text class="city" x="454" y="717" text-anchor="start">Las Vegas <tspan class="t">74&#176;</tspan></text><text class="city" x="272" y="792" text-anchor="end">Los Angeles <tspan class="t">74&#176;</tspan></text><text class="city" x="1501" y="486" text-anchor="start">Chicago <tspan class="t">78&#176;</tspan></text><text class="city" x="1914" y="1218" text-anchor="start">Miami <tspan class="t">90&#176;</tspan></text><text class="city" x="1295" y="350" text-anchor="start">Minneapolis <tspan class="t">90&#176;</tspan></text><text class="city" x="1456" y="1070" text-anchor="start">New Orleans <tspan class="t">87&#176;</tspan></text><text class="city" x="1142" y="817" text-anchor="start">Oklahoma City <tspan class="t">90&#176;</tspan></text><text class="city" x="556" y="866" text-anchor="start">Phoenix <tspan class="t">89&#176;</tspan></text><text class="city" x="307" y="861" text-anchor="end">San Diego <tspan class="t">73&#176;</tspan></text><text class="city" x="1071" y="1132" text-anchor="end">San Antonio <tspan class="t">90&#176;</tspan></text><text class="city" x="1596" y="652" text-anchor="start">Louisville <tspan class="t">67&#176;</tspan></text><text class="city" x="328" y="116" text-anchor="start">Seattle <tspan class="t">60&#176;</tspan></text><text class="city" x="197" y="579" text-anchor="start">San Francisco <tspan class="t">65&#176;</tspan></text><text class="city" x="2150" y="414" text-anchor="start">New York <tspan class="t">60&#176;</tspan></text><text class="city" x="2150" y="457" text-anchor="start">Newark <tspan class="t">62&#176;</tspan></text><text class="city" x="2150" y="500" text-anchor="start">Trenton <tspan class="t">61&#176;</tspan></text><text class="city" x="2150" y="543" text-anchor="start">Philadelphia <tspan class="t">65&#176;</tspan></text><text class="city" x="2150" y="586" text-anchor="start">Washington <tspan class="t">67&#176;</tspan></text></g></svg>
+      </div>
+      <figcaption>
+        <div class="legend" aria-hidden="true"><span style="background:#4b5fa6"></span><span style="background:#5576b8"></span><span style="background:#5f8fc6"></span><span style="background:#6aa9cf"></span><span style="background:#77c0ca"></span><span style="background:#8ccfb4"></span><span style="background:#a9d99c"></span><span style="background:#cadf8b"></span><span style="background:#e6dc80"></span><span style="background:#f2c96f"></span><span style="background:#f4ae5f"></span><span style="background:#ee9152"></span><span style="background:#e2724a"></span><span style="background:#cf5445"></span><span style="background:#b53e45"></span><span style="background:#932f48"></span><b style="grid-column:2">40&#176;</b><b style="grid-column:6">60&#176;</b><b style="grid-column:10">80&#176;</b><b style="grid-column:14">100&#176;</b></div>
+        <p id="map-cap">The day&rsquo;s high across the lower 48 on Sunday, October 11, 2026, from NOAA&rsquo;s 3 km HRRR model, with
+          the official National Weather Service high at each airport Isotherm trades. Lines are isotherms, 10&nbsp;&deg;F apart.</p>
+      </figcaption>
+    </figure>
+
+    <section class="block" id="day" aria-labelledby="day-h">
+      <div class="head">
+        <h2 id="day-h">A day in the market</h2>
+        <p>Every airport gets a new market each day, split into 2&nbsp;&deg;F brackets. Isotherm re-forecasts at set times, keeps
+          its quotes fresh in between, and holds every position until the official report settles it. Times are Eastern.</p>
+      </div>
+      <ol class="day">
+        <li><time>10 AM</time><p>The day before, Kalshi lists the brackets for tomorrow&rsquo;s high.</p></li>
+        <li><time>11 AM, 2 PM</time><p>Early bets, where the forecast&rsquo;s edge over the market is largest.</p></li>
+        <li><time>5 PM, 11 PM</time><p>Night-before forecasts from the evening model runs.</p></li>
+        <li><time>5 AM to 5 PM</time><p>On the day, forecasts refresh every three hours and live sensor readings rule out
+          brackets the high has passed.</p></li>
+        <li><time>11:59 PM</time><p>Trading closes.</p></li>
+        <li class="settle"><time>7 AM</time><p>The next morning, markets settle on the National Weather Service&rsquo;s daily
+          climate report, East Coast first.</p></li>
+      </ol>
+    </section>
+
+    <section class="block" id="dashboard" aria-labelledby="dash-h">
+      <div class="head">
+        <h2 id="dash-h">A live dashboard, on any phone</h2>
+        <p>A private dashboard shows the account, the money at risk against every limit, profit by day, and which cities
+          and bet types are working. The trading server publishes encrypted numbers every minute and the page decrypts them on
+          the device, so it stays live without a laptop running anywhere.</p>
+      </div>
+      <figure class="shots">
+        <img class="desk" src="assets/dashboard-desktop.webp" width="2560" height="1800"
+          alt="Isotherm dashboard on a desktop: bot health, account value, today's result, and capital in use against each limit, shown with made-up sample data.">
+        <img class="phone" src="assets/dashboard-phone.webp" width="1170" height="2532"
+          alt="Isotherm dashboard on a phone: the daily profit chart and seven-day summary, shown with made-up sample data.">
+      </figure>
+      <p class="shots-cap">Shown with made-up sample data. The live dashboard is private.</p>
+    </section>
+
+    <section class="block" id="how" aria-labelledby="how-h">
+      <div class="head">
+        <h2 id="how-h">How it works</h2>
+        <p>Four stages run on one small cloud server, every day, on their own.</p>
+      </div>
+      <ol class="steps">
+        <li><div><h3>Free data, lined up in time</h3>
+          <p>NOAA&rsquo;s National Blend of Models, model output statistics and the 3&nbsp;km HRRR, ECMWF&rsquo;s open data, live
+            airport sensors, and the official daily climate reports. Every input is matched to the minute it became public,
+            so training never sees anything the live system couldn&rsquo;t have.</p></div></li>
+        <li><div><h3>A forecast of the exact number</h3>
+          <p>A LightGBM model predicts a probability for every whole degree the official report could show. The night before,
+            it misses by <span class="figure">1.57&nbsp;&deg;F</span> on average against <span class="figure">1.92&nbsp;&deg;F</span>
+            for the best single NOAA product, and it beats that product at all 24 airports.</p></div></li>
+        <li><div><h3>Blended with the market</h3>
+          <p>The market is sharper than any single forecast, so Isotherm doesn&rsquo;t try to replace it. It pools market prices
+            with its own forecast using weights refit every week, and leans against the market when traders anchor on the
+            government&rsquo;s headline number.</p></div></li>
+        <li><div><h3>Trades inside hard limits</h3>
+          <p>Orders go in only where the price sits past the blend by the fee plus a margin. There are caps on every bracket,
+            city and the whole account, daily and drawdown stops, one shared budget for cities whose weather moves together,
+            and orders that expire within minutes if the server goes quiet.</p></div></li>
+      </ol>
+    </section>
+
+    <section class="block" aria-labelledby="test-h">
+      <div class="head">
+        <h2 id="test-h">Tested before it touched money</h2>
+        <p>Model changes had to beat the version before them on rules written down before the test, and the trading code
+          ran on Kalshi&rsquo;s demo exchange before a real dollar went in.</p>
+      </div>
+      <ul class="checks">
+        <li><strong>Walk-forward tests.</strong> Every model is scored only on days after the ones it learned from.</li>
+        <li><strong>A blind holdout.</strong> October and November are set aside and scored once, on December 1, by frozen scripts.</li>
+        <li><strong>A leakage audit.</strong> Inputs rebuilt from data cut off at each decision time came out identical.</li>
+        <li><strong>Market replays.</strong> The real trading code, run on recorded order books with pessimistic fill rules.</li>
+        <li><strong>A rival bot.</strong> On Kalshi&rsquo;s demo exchange, a second account traded against Isotherm on purpose.</li>
+        <li><strong>622 automated tests,</strong> including a 40,000-cycle chaos test with injected API failures.</li>
+      </ul>
+    </section>
+
+    <section class="block" aria-labelledby="stack-h">
+      <h2 id="stack-h">Built with</h2>
+      <ul class="stack">
+        <li>Python</li><li>LightGBM</li><li>NumPy and pandas</li><li>SciPy</li><li>SQLite</li><li>eccodes (GRIB2)</li>
+        <li>Kalshi REST and WebSocket APIs</li><li>AWS EC2</li><li>systemd</li><li>Web Crypto</li><li>GitHub Pages</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    <div>
+      <p>Named for the isotherm, the line on a weather map that joins places at the same temperature. Alexander von Humboldt
+        drew the first one in 1817.</p>
+      <p>Not affiliated with Kalshi.</p>
+    </div>
+    <div class="who">
+      <p>Built by Shourya Mehta</p>
+      <p><a href="https://github.com/shourya0mehta/isotherm">Code on GitHub</a></p>
+    </div>
+  </footer>
+</div>
+</body>
+</html>

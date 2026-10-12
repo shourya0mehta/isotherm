@@ -7,7 +7,7 @@
   <rect x="0" y="0" width="1400" height="880" fill="#f6f8fa"/>
 
   <!-- title -->
-  <text x="40" y="58" font-size="30" font-weight="700" fill="#13202d">How the weather bot decides</text>
+  <text x="40" y="58" font-size="30" font-weight="700" fill="#13202d">How Isotherm decides</text>
   <text x="40" y="88" font-size="16" fill="#5b6977">Free weather data → our forecaster → blended with Kalshi prices → fair value → orders. 24 airports, 7 times a day.</text>
 
   <!-- column headers -->
