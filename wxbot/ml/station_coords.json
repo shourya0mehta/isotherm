@@ -1,0 +1,146 @@
+{
+ "KATL": {
+  "lat": 33.6301,
+  "lon": -84.4418,
+  "elev": 315.0,
+  "name": "ATLANTA INTL ARPT"
+ },
+ "KAUS": {
+  "lat": 30.183,
+  "lon": -97.6799,
+  "elev": 146.0,
+  "name": "Austin Bergstrom Intl"
+ },
+ "KBOS": {
+  "lat": 42.3606,
+  "lon": -71.0097,
+  "elev": 9.0,
+  "name": "BOSTON/LOGAN INTL"
+ },
+ "KDCA": {
+  "lat": 38.8472,
+  "lon": -77.0346,
+  "elev": 20.0,
+  "name": "WASHINGTON/NATIONAL"
+ },
+ "KDEN": {
+  "lat": 39.8328,
+  "lon": -104.6575,
+  "elev": 1656.0,
+  "name": "DENVER INTNL ARPT"
+ },
+ "KDFW": {
+  "lat": 32.8968,
+  "lon": -97.038,
+  "elev": 182.0,
+  "name": "DALLAS/FT WORTH"
+ },
+ "KEWR": {
+  "lat": 40.6827,
+  "lon": -74.1693,
+  "elev": 2.0,
+  "name": "Newark Intl"
+ },
+ "KHOU": {
+  "lat": 29.6375,
+  "lon": -95.2824,
+  "elev": 14.0,
+  "name": "HOUSTON/WILL HOBBY"
+ },
+ "KLAS": {
+  "lat": 36.0719,
+  "lon": -115.1634,
+  "elev": 663.0,
+  "name": "Las Vegas - Harry Reid Intl"
+ },
+ "KLAX": {
+  "lat": 33.9382,
+  "lon": -118.3865,
+  "elev": 32.0,
+  "name": "LOS ANGELES INTL"
+ },
+ "KMDW": {
+  "lat": 41.786,
+  "lon": -87.7524,
+  "elev": 188.0,
+  "name": "CHICAGO"
+ },
+ "KMIA": {
+  "lat": 25.788,
+  "lon": -80.3169,
+  "elev": 4.0,
+  "name": "MIAMI INTL AIRPORT"
+ },
+ "KMSP": {
+  "lat": 44.8854,
+  "lon": -93.2313,
+  "elev": 265.0,
+  "name": "MINNEAPOLIS"
+ },
+ "KMSY": {
+  "lat": 29.9933,
+  "lon": -90.2511,
+  "elev": 0.0,
+  "name": "New Orleans - Louis Armstrong"
+ },
+ "KNYC": {
+  "lat": 40.779,
+  "lon": -73.9692,
+  "elev": 27.0,
+  "name": "NEW YORK CITY"
+ },
+ "KOKC": {
+  "lat": 35.3889,
+  "lon": -97.6006,
+  "elev": 397.0,
+  "name": "Oklahoma City"
+ },
+ "KPHL": {
+  "lat": 39.8734,
+  "lon": -75.2266,
+  "elev": 2.0,
+  "name": "Philadelphia Intl"
+ },
+ "KPHX": {
+  "lat": 33.4343,
+  "lon": -112.0116,
+  "elev": 337.0,
+  "name": "PHOENIX/SKY HARBOR"
+ },
+ "KSAN": {
+  "lat": 32.7339,
+  "lon": -117.1845,
+  "elev": 9.0,
+  "name": "SAN DIEGO/LINDBERG"
+ },
+ "KSAT": {
+  "lat": 29.53,
+  "lon": -98.4673,
+  "elev": 236.0,
+  "name": "San Antonio"
+ },
+ "KSDF": {
+  "lat": 38.1774,
+  "lon": -85.7308,
+  "elev": 146.0,
+  "name": "Louisville Intl"
+ },
+ "KSEA": {
+  "lat": 47.4447,
+  "lon": -122.3144,
+  "elev": 137.0,
+  "name": "SEATTLE-TACOMA INTL"
+ },
+ "KSFO": {
+  "lat": 37.619,
+  "lon": -122.3749,
+  "elev": 5.0,
+  "name": "SAN FRANCISCO INTL"
+ },
+ "KTTN": {
+  "lat": 40.2768,
+  "lon": -74.8159,
+  "elev": 65.0,
+  "name": "TRENTON/MERCER CO."
+ }
+}

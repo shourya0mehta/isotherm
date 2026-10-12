@@ -1,0 +1,12 @@
+requests>=2.31
+cryptography>=42
+PyYAML>=6.0
+# ML fair value (wxbot/ml): Tier-1 v2 forecaster + market pool. The bot falls back to the market-anchored fair
+# value if these are missing, so they are safe to skip on a minimal install.
+numpy>=1.24
+pandas>=2.0
+lightgbm>=4.0
+eccodes>=2.37      # ECMWF open data and NOAA HRRR GRIB decoding (wheels bundle the library)
+scipy>=1.10        # weekly pool refit (scripts/refit_pool.py) and research/ml
+# optional: tests
+pytest>=8

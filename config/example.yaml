@@ -1,0 +1,155 @@
+# Example config for the public copy of wxbot. It runs in paper mode (simulated fills on Kalshi's public tape, no
+# keys). The values are illustrative: the configs the bot trades with live are kept private.
+# Secrets (API key id + private key path) live in .env, never in a config.
+mode: paper          # paper = simulate fills on the live public tape (no keys needed); live = real orders
+env: prod            # prod | demo (demo needs a separate demo account + demo API key)
+db_path: data/wxbot.sqlite
+status_path: data/status.json
+bankroll_usd: 500
+
+loop:
+  tick_seconds: 2         # the loop wakes every 2 s; each task below runs when its interval is up
+  universe_every_s: 600   # new events appear once a day; a 27-request burst every 3 min drew 429s
+  books_every_s: 5        # all order books in 2 batched requests (100 markets each): about 0.4 requests/s
+  trades_every_s: 10
+  metar_every_s: 60       # one batched request for every station
+  metar_fast_every_s: 20  # ...every 20 s while routine reports land (UTC minutes :53 through :02)
+  metar_fast_window: [53, 2]
+  nbm_every_s: 900
+  index_every_s: 60
+  settle_every_s: 900
+  positions_every_s: 5    # live: orders, fills, positions, balance (4 requests)
+
+ml:
+  enabled: false       # Tier-1 forecaster pooled with the market. The trained models are not in this repository, so the
+                       # bot uses its market-anchored fair value; train your own (research/ml/train_final.py) to turn it on
+  raw_dir: data/ml_raw # live copies of the free inputs (IEM MOS/obs/CLI, ECMWF open data), training file layout
+  weekly_refit:        # pre-registered production procedure: pool weights refit on the 90 days ending 2 days before
+    enabled: true
+    weekday: 0         # Monday
+    after_utc_hour: 6
+
+sleeve_a:
+  enabled: true
+  # daily HIGHS only (Sept 2026: lows showed no maker edge)
+  series: [KXHIGHAUS, KXHIGHCHI, KXHIGHDEN, KXHIGHLAX, KXHIGHMIA, KXHIGHNY, KXHIGHPHIL, KXHIGHTATL,
+           KXHIGHTBOS, KXHIGHTDAL, KXHIGHTDC, KXHIGHTEWR, KXHIGHTHOU, KXHIGHTLV, KXHIGHTNOLA,
+           KXHIGHTOKC, KXHIGHTPHX, KXHIGHTSAN, KXHIGHTSATX, KXHIGHTSDF, KXHIGHTSEA, KXHIGHTSFO, KXHIGHTTTN]
+  decided_only: true       # only outcomes with fair win prob >= decided_prob (positive in both halves of Sept replay)
+  decided_prob: 0.97
+  min_edge_c: 2.0          # bid at least 2c below fair
+  improve_if_edge_c: 99    # never step inside the spread
+  clip_contracts: 25
+  stop_minutes_before_close: 30
+  max_disagreement: 0.35   # skip an event if market and NBM disagree this much
+  decided_max_cost_usd: 40
+  min_price_c: 60
+  max_price_c: 98
+  w_nbm: 0.2
+
+sleeve_t:
+  # Thin-book maker: quotes around the pooled fair value on newly listed cities with wide books.
+  # Replaces Sleeve A on these series; its own caps, then the global caps.
+  enabled: true
+  series: [KXHIGHTTTN, KXHIGHTSAN, KXHIGHTEWR, KXHIGHTSDF]
+  fav_min_prob: 0.78
+  min_edge_c: 3.0
+  improve_if_edge_c: 5.0     # step 1c inside the spread when the edge stays >= 5c
+  decided_max_cost_usd: 25
+  max_disagreement: 1.0      # the replay never skipped thin books for pool-vs-market disagreement
+  clip_contracts: 25
+  stop_minutes_before_close: 30
+  min_price_c: 60
+  max_price_c: 98
+  max_loss_per_bracket_usd: 15
+  max_loss_per_event_usd: 25
+  max_total_open_risk_usd: 100
+  max_cash_usd: 100
+
+round_guard:              # round 7 (Oct 9, after KXHIGHTOKC-26OCT08): Sleeves A and T skip the two brackets either side of a
+                          # line while whole-C 5-minute readings leave the day's high (low) on both sides of it and no
+                          # exact reading or 6-hour group settles it (wxbot/models/round_guard.py)
+  enabled: false
+  sleeves: [A, T]             # which daily makers it applies to (Sleeve A near-certain, Sleeve T thin cities)
+  obs5_db: data/obs5.sqlite   # the observation archive (scripts/obs5_archive.py)
+  read_every_s: 60
+  stale_minutes: 45           # warn (hourly) when the archive has nothing newer: the guard then sees only the METARs
+
+public_page:              # data/public/index.html: own forecasts + track record only (serve it from the VM)
+  enabled: true
+  dir: data/public
+  every_s: 600
+
+taker_shadow:            # Sleeve X: LOGS model-taker trades only (table taker_shadow); never sends an order
+  enabled: true
+  margin: 0.06            # pooled probability must beat the price by the taker fee plus 6c
+  size: 5                 # contracts per logged trade (capped by the displayed size)
+  trade: false            # send real (paper/live) taker orders: only after the Dec 1 tests pass
+  max_spread: 0.10        # liquid books only: mean spread <= 10c and mids summing to 0.90-1.25
+  msum_lo: 0.90
+  msum_hi: 1.25
+  extra_series: [KXHIGHTMIN]  # Minneapolis: not quoted by Sleeve A, but part of the rule's 20 cities -> watch only
+
+sleeve_h:                 # hourly Weather Index markets, tail maker: SHADOW ONLY (own paper broker, table hourly_shadow)
+  shadow: true            # simulate on the live tape; never sends an order 
+  enabled: false
+  series: [KXTEMPMIAH, KXTEMPNYCHS, KXTEMPCHIHS, KXTEMPLAXHS]
+  a_max: 0.10             # quote a strike's tail side only when its touch is within 10c of 0 or 100
+  size: 20                # contracts filled per strike and side per hour, at most
+  cap_usd: 25             # worst-case loss per hourly event over its outcome scenarios (filled + resting)
+  stop_min: 0             # minutes before the settlement minute to stop quoting
+  nowcast: true           # also shadow variant H2: quote a tail side only if the hourly nowcast agrees (secondary)
+  p_lo: 0.02
+  edge: 0.02
+
+rain_shadow:              # Sleeve R, SHADOW ONLY: model taker on the daily rain markets (KXRAIN), rule frozen Oct 3
+  enabled: true           # log what it would buy at each rain decision hour; never sends orders
+  size: 5                 # contracts logged per signal
+  margin: 0.06            # edge over price + taker fee required
+  trade: false            # send real (paper/live) taker orders: only after the Dec 1 tests pass
+
+exec_log:                 # execution log (outside review, Oct 8; wxbot/execution/exec_log.py), table exec_log: the book
+  enabled: false          # at each Sleeve X decision and X / E / R taker order (best bid/ask, sizes, depth within 2c),
+  offsets_s: [60, 300, 900]   # re-read after these seconds; skipped, never waited for, when the read budget is short
+  reserve_frac: 0.5       # re-read only while the read limiter keeps this share of its capacity for trading
+  timeout_s: 3.0          # per re-read request, never retried
+  max_late_s: 120         # a re-read more than this late is skipped (its offset would mislead)
+
+tape_archive:             # our own copy of the public tape of settled events (results, 1-minute candles, trades) for the
+  enabled: true           # Dec 1 holdout replays; Kalshi moves old data to /historical after ~2 months. Background
+  since: "2026-10-01"     # thread, public endpoints only, ~1 request a second; files under data/tape/
+  every_s: 900
+  gap_s: 1.5
+  extra_daily_series: [KXRAIN]   # daily rain markets (research line, not traded): kept for a later test
+
+sleeve_b:
+  enabled: false     # flip to true ONLY after Kalshi support confirms 1c quiet-side quoting is acceptable
+  shadow: true       # compute and log what Sleeve B would earn (no orders)
+  max_win_prob: 0.01
+  min_distance_f: 2.0
+  max_contracts_per_strike: 1000
+  hours_utc: []      # rollout control, e.g. [4, 5, 6, 7, 8] = midnight-5 AM ET only (empty = all hours)
+  max_strikes: 10    # rollout control: strikes per hourly event (start with 2)
+
+risk:
+  max_loss_per_bracket_usd: 30
+  max_loss_per_event_usd: 40
+  max_total_open_risk_usd: 350
+  daily_loss_stop_usd: 40      # halts for the rest of the ET day, resumes next day (agreed Oct 3)
+  total_drawdown_stop_usd: 100 # hard halt: needs a human (agreed Oct 3: stop $100 below the best point)
+  max_cash_deployed_usd: 560   # cash locked by positions + resting orders (full cost unless netting is on)
+  min_cash_reserve_usd: 25     # live: never place new orders when available cash is below this
+  assume_netting: false        # paper only; live reads the account's collateral-netting setting
+  max_api_errors_per_min: 15   # pauses 15 minutes and cancels everything
+  stale_book_seconds: 90
+  stale_weather_minutes: 180
+
+execution:
+  order_ttl_s: 1200  # dead-man switch: live orders expire 20 min after the last refresh (amends keep queue spot)
+dashboard_every_s: 300  # writes data/<db name>_dashboard.html
+
+alerts:
+  # Optional phone alerts via ntfy.sh (free, no account): install the ntfy app, subscribe to a long random topic,
+  # and paste it here. Sends halts, repeated errors, start/stop and one daily summary. Empty = off.
+  ntfy_topic: ""
+  daily_summary_hour_et: 21

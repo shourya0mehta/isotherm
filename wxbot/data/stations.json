@@ -1,0 +1,386 @@
+{
+ "KXHIGHAUS": {
+  "series": "KXHIGHAUS",
+  "kind": "high",
+  "city": "Austin",
+  "cli": "CLIAUS",
+  "icao": "KAUS",
+  "lst_offset_h": -6
+ },
+ "KXHIGHCHI": {
+  "series": "KXHIGHCHI",
+  "kind": "high",
+  "city": "Chicago",
+  "cli": "CLIMDW",
+  "icao": "KMDW",
+  "lst_offset_h": -6
+ },
+ "KXHIGHDEN": {
+  "series": "KXHIGHDEN",
+  "kind": "high",
+  "city": "Denver",
+  "cli": "CLIDEN",
+  "icao": "KDEN",
+  "lst_offset_h": -7
+ },
+ "KXHIGHLAX": {
+  "series": "KXHIGHLAX",
+  "kind": "high",
+  "city": "Los Angeles",
+  "cli": "CLILAX",
+  "icao": "KLAX",
+  "lst_offset_h": -8
+ },
+ "KXHIGHMIA": {
+  "series": "KXHIGHMIA",
+  "kind": "high",
+  "city": "Miami",
+  "cli": "CLIMIA",
+  "icao": "KMIA",
+  "lst_offset_h": -5
+ },
+ "KXHIGHNY": {
+  "series": "KXHIGHNY",
+  "kind": "high",
+  "city": "New York City",
+  "cli": "CLINYC",
+  "icao": "KNYC",
+  "lst_offset_h": -5
+ },
+ "KXHIGHPHIL": {
+  "series": "KXHIGHPHIL",
+  "kind": "high",
+  "city": "Philadelphia",
+  "cli": "CLIPHL",
+  "icao": "KPHL",
+  "lst_offset_h": -5
+ },
+ "KXHIGHTATL": {
+  "series": "KXHIGHTATL",
+  "kind": "high",
+  "city": "Atlanta",
+  "cli": "CLIATL",
+  "icao": "KATL",
+  "lst_offset_h": -5
+ },
+ "KXHIGHTBOS": {
+  "series": "KXHIGHTBOS",
+  "kind": "high",
+  "city": "Boston",
+  "cli": "CLIBOS",
+  "icao": "KBOS",
+  "lst_offset_h": -5
+ },
+ "KXHIGHTDAL": {
+  "series": "KXHIGHTDAL",
+  "kind": "high",
+  "city": "Dallas",
+  "cli": "CLIDFW",
+  "icao": "KDFW",
+  "lst_offset_h": -6
+ },
+ "KXHIGHTDC": {
+  "series": "KXHIGHTDC",
+  "kind": "high",
+  "city": "Washington DC",
+  "cli": "CLIDCA",
+  "icao": "KDCA",
+  "lst_offset_h": -5
+ },
+ "KXHIGHTEWR": {
+  "series": "KXHIGHTEWR",
+  "kind": "high",
+  "city": "Newark",
+  "cli": "CLIEWR",
+  "icao": "KEWR",
+  "lst_offset_h": -5
+ },
+ "KXHIGHTHOU": {
+  "series": "KXHIGHTHOU",
+  "kind": "high",
+  "city": "Houston",
+  "cli": "CLIHOU",
+  "icao": "KHOU",
+  "lst_offset_h": -6
+ },
+ "KXHIGHTLV": {
+  "series": "KXHIGHTLV",
+  "kind": "high",
+  "city": "Las Vegas",
+  "cli": "CLILAS",
+  "icao": "KLAS",
+  "lst_offset_h": -8
+ },
+ "KXHIGHTMIN": {
+  "series": "KXHIGHTMIN",
+  "kind": "high",
+  "city": "Minneapolis",
+  "cli": "CLIMSP",
+  "icao": "KMSP",
+  "lst_offset_h": -6
+ },
+ "KXHIGHTNOLA": {
+  "series": "KXHIGHTNOLA",
+  "kind": "high",
+  "city": "New Orleans",
+  "cli": "CLIMSY",
+  "icao": "KMSY",
+  "lst_offset_h": -6
+ },
+ "KXHIGHTOKC": {
+  "series": "KXHIGHTOKC",
+  "kind": "high",
+  "city": "Oklahoma City",
+  "cli": "CLIOKC",
+  "icao": "KOKC",
+  "lst_offset_h": -6
+ },
+ "KXHIGHTPHX": {
+  "series": "KXHIGHTPHX",
+  "kind": "high",
+  "city": "Phoenix",
+  "cli": "CLIPHX",
+  "icao": "KPHX",
+  "lst_offset_h": -7
+ },
+ "KXHIGHTSAN": {
+  "series": "KXHIGHTSAN",
+  "kind": "high",
+  "city": "San Diego",
+  "cli": "CLISAN",
+  "icao": "KSAN",
+  "lst_offset_h": -8
+ },
+ "KXHIGHTSATX": {
+  "series": "KXHIGHTSATX",
+  "kind": "high",
+  "city": "San Antonio",
+  "cli": "CLISAT",
+  "icao": "KSAT",
+  "lst_offset_h": -6
+ },
+ "KXHIGHTSDF": {
+  "series": "KXHIGHTSDF",
+  "kind": "high",
+  "city": "Louisville",
+  "cli": "CLISDF",
+  "icao": "KSDF",
+  "lst_offset_h": -5
+ },
+ "KXHIGHTSEA": {
+  "series": "KXHIGHTSEA",
+  "kind": "high",
+  "city": "Seattle",
+  "cli": "CLISEA",
+  "icao": "KSEA",
+  "lst_offset_h": -8
+ },
+ "KXHIGHTSFO": {
+  "series": "KXHIGHTSFO",
+  "kind": "high",
+  "city": "San Francisco",
+  "cli": "CLISFO",
+  "icao": "KSFO",
+  "lst_offset_h": -8
+ },
+ "KXHIGHTTTN": {
+  "series": "KXHIGHTTTN",
+  "kind": "high",
+  "city": "Trenton",
+  "cli": "CLITTN",
+  "icao": "KTTN",
+  "lst_offset_h": -5
+ },
+ "KXLOWTATL": {
+  "series": "KXLOWTATL",
+  "kind": "low",
+  "city": "Atlanta",
+  "cli": "CLIATL",
+  "icao": "KATL",
+  "lst_offset_h": -5
+ },
+ "KXLOWTAUS": {
+  "series": "KXLOWTAUS",
+  "kind": "low",
+  "city": "Austin",
+  "cli": "CLIAUS",
+  "icao": "KAUS",
+  "lst_offset_h": -6
+ },
+ "KXLOWTBOS": {
+  "series": "KXLOWTBOS",
+  "kind": "low",
+  "city": "Boston",
+  "cli": "CLIBOS",
+  "icao": "KBOS",
+  "lst_offset_h": -5
+ },
+ "KXLOWTCHI": {
+  "series": "KXLOWTCHI",
+  "kind": "low",
+  "city": "Chicago",
+  "cli": "CLIMDW",
+  "icao": "KMDW",
+  "lst_offset_h": -6
+ },
+ "KXLOWTDAL": {
+  "series": "KXLOWTDAL",
+  "kind": "low",
+  "city": "Dallas",
+  "cli": "CLIDFW",
+  "icao": "KDFW",
+  "lst_offset_h": -6
+ },
+ "KXLOWTDC": {
+  "series": "KXLOWTDC",
+  "kind": "low",
+  "city": "Washington DC",
+  "cli": "CLIDCA",
+  "icao": "KDCA",
+  "lst_offset_h": -5
+ },
+ "KXLOWTDEN": {
+  "series": "KXLOWTDEN",
+  "kind": "low",
+  "city": "Denver",
+  "cli": "CLIDEN",
+  "icao": "KDEN",
+  "lst_offset_h": -7
+ },
+ "KXLOWTEWR": {
+  "series": "KXLOWTEWR",
+  "kind": "low",
+  "city": "Newark",
+  "cli": "CLIEWR",
+  "icao": "KEWR",
+  "lst_offset_h": -5
+ },
+ "KXLOWTHOU": {
+  "series": "KXLOWTHOU",
+  "kind": "low",
+  "city": "Houston",
+  "cli": "CLIHOU",
+  "icao": "KHOU",
+  "lst_offset_h": -6
+ },
+ "KXLOWTLAX": {
+  "series": "KXLOWTLAX",
+  "kind": "low",
+  "city": "Los Angeles",
+  "cli": "CLILAX",
+  "icao": "KLAX",
+  "lst_offset_h": -8
+ },
+ "KXLOWTLV": {
+  "series": "KXLOWTLV",
+  "kind": "low",
+  "city": "Las Vegas",
+  "cli": "CLILAS",
+  "icao": "KLAS",
+  "lst_offset_h": -8
+ },
+ "KXLOWTMIA": {
+  "series": "KXLOWTMIA",
+  "kind": "low",
+  "city": "Miami",
+  "cli": "CLIMIA",
+  "icao": "KMIA",
+  "lst_offset_h": -5
+ },
+ "KXLOWTMIN": {
+  "series": "KXLOWTMIN",
+  "kind": "low",
+  "city": "Minneapolis",
+  "cli": "CLIMSP",
+  "icao": "KMSP",
+  "lst_offset_h": -6
+ },
+ "KXLOWTNOLA": {
+  "series": "KXLOWTNOLA",
+  "kind": "low",
+  "city": "New Orleans",
+  "cli": "CLIMSY",
+  "icao": "KMSY",
+  "lst_offset_h": -6
+ },
+ "KXLOWTNYC": {
+  "series": "KXLOWTNYC",
+  "kind": "low",
+  "city": "New York City",
+  "cli": "CLINYC",
+  "icao": "KNYC",
+  "lst_offset_h": -5
+ },
+ "KXLOWTOKC": {
+  "series": "KXLOWTOKC",
+  "kind": "low",
+  "city": "Oklahoma City",
+  "cli": "CLIOKC",
+  "icao": "KOKC",
+  "lst_offset_h": -6
+ },
+ "KXLOWTPHIL": {
+  "series": "KXLOWTPHIL",
+  "kind": "low",
+  "city": "Philadelphia",
+  "cli": "CLIPHL",
+  "icao": "KPHL",
+  "lst_offset_h": -5
+ },
+ "KXLOWTPHX": {
+  "series": "KXLOWTPHX",
+  "kind": "low",
+  "city": "Phoenix",
+  "cli": "CLIPHX",
+  "icao": "KPHX",
+  "lst_offset_h": -7
+ },
+ "KXLOWTSAN": {
+  "series": "KXLOWTSAN",
+  "kind": "low",
+  "city": "San Diego",
+  "cli": "CLISAN",
+  "icao": "KSAN",
+  "lst_offset_h": -8
+ },
+ "KXLOWTSATX": {
+  "series": "KXLOWTSATX",
+  "kind": "low",
+  "city": "San Antonio",
+  "cli": "CLISAT",
+  "icao": "KSAT",
+  "lst_offset_h": -6
+ },
+ "KXLOWTSDF": {
+  "series": "KXLOWTSDF",
+  "kind": "low",
+  "city": "Louisville",
+  "cli": "CLISDF",
+  "icao": "KSDF",
+  "lst_offset_h": -5
+ },
+ "KXLOWTSEA": {
+  "series": "KXLOWTSEA",
+  "kind": "low",
+  "city": "Seattle",
+  "cli": "CLISEA",
+  "icao": "KSEA",
+  "lst_offset_h": -8
+ },
+ "KXLOWTSFO": {
+  "series": "KXLOWTSFO",
+  "kind": "low",
+  "city": "San Francisco",
+  "cli": "CLISFO",
+  "icao": "KSFO",
+  "lst_offset_h": -8
+ },
+ "KXLOWTTTN": {
+  "series": "KXLOWTTTN",
+  "kind": "low",
+  "city": "Trenton",
+  "cli": "CLITTN",
+  "icao": "KTTN",
+  "lst_offset_h": -5
+ }
+}

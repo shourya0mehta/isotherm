@@ -1,0 +1,173 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="880" viewBox="0 0 1400 880" font-family="Segoe UI, Helvetica Neue, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#7d8c9b"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="1400" height="880" fill="#f6f8fa"/>
+
+  <!-- title -->
+  <text x="40" y="58" font-size="30" font-weight="700" fill="#13202d">How the weather bot decides</text>
+  <text x="40" y="88" font-size="16" fill="#5b6977">Free weather data → our forecaster → blended with Kalshi prices → fair value → orders. 24 airports, 7 times a day.</text>
+
+  <!-- column headers -->
+  <g font-size="12.5" font-weight="600" fill="#5b6977" letter-spacing="1.2">
+    <text x="40" y="132">1   FREE DATA</text>
+    <text x="390" y="132">2   FORECASTER (TIER 1)</text>
+    <text x="750" y="132">3   BLEND WITH THE MARKET (TIER 2)</text>
+    <text x="1090" y="132">4   TRADING BOT</text>
+  </g>
+
+  <!-- data cards -->
+  <g>
+    <rect x="40" y="148" width="290" height="120" rx="8" fill="#ffffff" stroke="#d5dde5"/>
+    <text x="56" y="178" font-size="16" font-weight="700" fill="#13202d">NOAA station forecasts</text>
+    <text x="56" y="202" font-size="13.5" fill="#26384a">NBM blend, GFS + NAM model stats,</text>
+    <text x="56" y="221" font-size="13.5" fill="#26384a">LAMP hourly updates</text>
+    <text x="56" y="250" font-size="12.5" fill="#6b7a88">Iowa State archive, 2020 to now</text>
+
+    <rect x="40" y="286" width="290" height="120" rx="8" fill="#ffffff" stroke="#d5dde5"/>
+    <text x="56" y="316" font-size="16" font-weight="700" fill="#13202d">European model (ECMWF)</text>
+    <text x="56" y="340" font-size="13.5" fill="#26384a">Temperature, 3-hour max, clouds,</text>
+    <text x="56" y="359" font-size="13.5" fill="#26384a">storm energy (CAPE), rain</text>
+    <text x="56" y="388" font-size="12.5" fill="#6b7a88">decoded straight from open GRIB files</text>
+
+    <rect x="40" y="424" width="290" height="120" rx="8" fill="#ffffff" stroke="#d5dde5"/>
+    <text x="56" y="454" font-size="16" font-weight="700" fill="#13202d">Live airport observations</text>
+    <text x="56" y="478" font-size="13.5" fill="#26384a">Temp now, high so far today,</text>
+    <text x="56" y="497" font-size="13.5" fill="#26384a">wind, clouds, pressure</text>
+    <text x="56" y="526" font-size="12.5" fill="#6b7a88">hourly reports, 0.1 °C precision</text>
+
+    <rect x="40" y="562" width="290" height="120" rx="8" fill="#ffffff" stroke="#d5dde5"/>
+    <text x="56" y="592" font-size="16" font-weight="700" fill="#13202d">Official climate report</text>
+    <text x="56" y="616" font-size="13.5" fill="#26384a">The number Kalshi settles on.</text>
+    <text x="56" y="635" font-size="13.5" fill="#26384a">Used as the answer key in training</text>
+    <text x="56" y="664" font-size="12.5" fill="#6b7a88">NWS CLI via The Weather Company</text>
+  </g>
+
+  <!-- data -> forecaster arrows -->
+  <g stroke="#7d8c9b" stroke-width="2" marker-end="url(#arr)">
+    <line x1="332" y1="208" x2="386" y2="208"/>
+    <line x1="332" y1="346" x2="386" y2="346"/>
+    <line x1="332" y1="484" x2="386" y2="484"/>
+    <line x1="332" y1="622" x2="386" y2="622"/>
+  </g>
+
+  <!-- forecaster -->
+  <rect x="390" y="148" width="300" height="534" rx="10" fill="#ffffff" stroke="#d4501c" stroke-opacity="0.55" stroke-width="1.5"/>
+  <text x="406" y="184" font-size="22" font-weight="700" fill="#c4471a">Forecaster</text>
+  <text x="406" y="206" font-size="13" fill="#6b7a88">LightGBM gradient-boosted trees</text>
+  <g font-size="13.5" fill="#26384a">
+    <circle cx="410" cy="236" r="3" fill="#c4471a"/>
+    <text x="420" y="241">Odds for every whole-degree high,</text>
+    <text x="420" y="260">e.g. 84°F 32%, 83°F 25%</text>
+    <circle cx="410" cy="288" r="3" fill="#c4471a"/>
+    <text x="420" y="293">Knows what already happened:</text>
+    <text x="420" y="312">never below today's high so far</text>
+    <circle cx="410" cy="340" r="3" fill="#c4471a"/>
+    <text x="420" y="345">Learns each airport's quirks and</text>
+    <text x="420" y="364">rounding from 6 years of data</text>
+    <circle cx="410" cy="392" r="3" fill="#c4471a"/>
+    <text x="420" y="397">Flags NOAA model upgrades</text>
+  </g>
+  <!-- illustrative output -->
+  <text x="410" y="452" font-size="12.5" fill="#6b7a88">Example output (illustrative)</text>
+  <line x1="414" y1="620" x2="666" y2="620" stroke="#c5cfd9" stroke-width="1.5"/>
+  <g fill="#d4501c">
+    <rect x="420" y="600" width="30" height="20" rx="2" fill-opacity="0.45"/>
+    <rect x="462" y="564" width="30" height="56" rx="2" fill-opacity="0.45"/>
+    <rect x="504" y="520" width="30" height="100" rx="2" fill-opacity="0.6"/>
+    <rect x="546" y="492" width="30" height="128" rx="2" fill-opacity="0.9"/>
+    <rect x="588" y="552" width="30" height="68" rx="2" fill-opacity="0.45"/>
+    <rect x="630" y="592" width="30" height="28" rx="2" fill-opacity="0.45"/>
+  </g>
+  <g font-size="12" fill="#5b6977" text-anchor="middle">
+    <text x="435" y="594">5%</text><text x="477" y="558">14%</text><text x="519" y="514">25%</text>
+    <text x="561" y="486" font-weight="700" fill="#13202d">32%</text><text x="603" y="546">17%</text><text x="645" y="586">7%</text>
+    <text x="435" y="640">81°</text><text x="477" y="640">82°</text><text x="519" y="640">83°</text>
+    <text x="561" y="640">84°</text><text x="603" y="640">85°</text><text x="645" y="640">86°</text>
+  </g>
+  <text x="410" y="668" font-size="12.5" fill="#6b7a88">chance the official high lands on each degree</text>
+
+  <!-- market -->
+  <rect x="750" y="148" width="280" height="132" rx="10" fill="#ffffff" stroke="#1f6fb8" stroke-opacity="0.55" stroke-width="1.5"/>
+  <text x="766" y="182" font-size="20" font-weight="700" fill="#1f6fb8">Kalshi prices</text>
+  <text x="766" y="208" font-size="13.5" fill="#26384a">Bracket ladder right now,</text>
+  <text x="766" y="227" font-size="13.5" fill="#26384a">e.g. 84-85°F trading at 31¢</text>
+  <text x="766" y="260" font-size="12.5" fill="#6b7a88">On its own, already beats NOAA</text>
+
+  <!-- market -> blender, market -> bot -->
+  <g stroke="#7d8c9b" stroke-width="2" marker-end="url(#arr)">
+    <line x1="890" y1="282" x2="890" y2="330"/>
+    <line x1="1032" y1="214" x2="1086" y2="214"/>
+    <line x1="692" y1="500" x2="746" y2="500"/>
+    <line x1="1032" y1="420" x2="1086" y2="420"/>
+    <line x1="1225" y1="498" x2="1225" y2="532"/>
+  </g>
+  <text x="900" y="311" font-size="12" fill="#6b7a88">prices</text>
+
+  <!-- blender -->
+  <rect x="750" y="336" width="280" height="346" rx="10" fill="#ffffff" stroke="#7a3db8" stroke-opacity="0.55" stroke-width="1.5"/>
+  <text x="766" y="372" font-size="22" font-weight="700" fill="#6c34a6">Blender</text>
+  <text x="766" y="394" font-size="13" fill="#6b7a88">Weighted pool, fit to past outcomes</text>
+  <text x="766" y="428" font-size="13.5" fill="#26384a">Mixes the market's odds with</text>
+  <text x="766" y="447" font-size="13.5" fill="#26384a">our forecaster's odds</text>
+  <rect x="766" y="464" width="248" height="70" rx="6" fill="#f2edf9"/>
+  <text x="780" y="492" font-size="16" font-weight="600" fill="#3d1f63">0.8 × market</text>
+  <text x="780" y="518" font-size="16" font-weight="600" fill="#3d1f63">+ 0.4 × forecaster</text>
+  <text x="1004" y="518" font-size="11.5" fill="#6b7a88" text-anchor="end">log scale</text>
+  <text x="766" y="560" font-size="13.5" fill="#26384a">Weights change by time of day</text>
+  <text x="766" y="584" font-size="13.5" fill="#26384a">Also fixes the market being</text>
+  <text x="766" y="603" font-size="13.5" fill="#26384a">too unsure of itself</text>
+  <text x="766" y="640" font-size="13.5" font-weight="700" fill="#13202d">Output: fair value, our best</text>
+  <text x="766" y="659" font-size="13.5" font-weight="700" fill="#13202d">estimate of each bracket's odds</text>
+
+  <!-- bot -->
+  <rect x="1090" y="148" width="270" height="348" rx="10" fill="#ffffff" stroke="#1d7a46" stroke-opacity="0.6" stroke-width="1.5"/>
+  <text x="1106" y="184" font-size="22" font-weight="700" fill="#1d7a46">Trading bot</text>
+  <g font-size="13.5" fill="#26384a">
+    <circle cx="1110" cy="214" r="3" fill="#1d7a46"/>
+    <text x="1120" y="219">Buys only when the price sits</text>
+    <text x="1120" y="238">below fair value by a margin</text>
+    <circle cx="1110" cy="266" r="3" fill="#1d7a46"/>
+    <text x="1120" y="271">Prefers near-certain brackets</text>
+    <text x="1120" y="290">late in the day</text>
+    <circle cx="1110" cy="318" r="3" fill="#1d7a46"/>
+    <text x="1120" y="323">Risk caps per bracket, per city,</text>
+    <text x="1120" y="342">and on total cash</text>
+    <circle cx="1110" cy="370" r="3" fill="#1d7a46"/>
+    <text x="1120" y="375">If the model breaks, it falls</text>
+    <text x="1120" y="394">back to market-only pricing</text>
+    <circle cx="1110" cy="422" r="3" fill="#1d7a46"/>
+    <text x="1120" y="427">Paper trading first,</text>
+    <text x="1120" y="446">real money after a clean week</text>
+  </g>
+
+  <!-- scorecard -->
+  <rect x="1090" y="536" width="270" height="146" rx="10" fill="#ffffff" stroke="#9aa7b3" stroke-width="1.5"/>
+  <text x="1106" y="570" font-size="20" font-weight="700" fill="#13202d">Scorecard</text>
+  <text x="1106" y="598" font-size="13.5" fill="#26384a">Every forecast saved once,</text>
+  <text x="1106" y="617" font-size="13.5" fill="#26384a">never edited</text>
+  <text x="1106" y="645" font-size="13.5" fill="#26384a">Scored against the market</text>
+  <text x="1106" y="664" font-size="13.5" fill="#26384a">after each day settles</text>
+
+  <!-- timeline -->
+  <text x="40" y="738" font-size="12.5" font-weight="600" fill="#5b6977" letter-spacing="1.2">WHEN IT RUNS (EASTERN TIME, EVERY AIRPORT, EVERY DAY)</text>
+  <line x1="70" y1="792" x2="1330" y2="792" stroke="#c5cfd9" stroke-width="2"/>
+  <g fill="#7a3db8">
+    <circle cx="70" cy="792" r="6"/><circle cx="385" cy="792" r="6"/><circle cx="700" cy="792" r="6"/>
+    <circle cx="857.5" cy="792" r="6"/><circle cx="1015" cy="792" r="6"/><circle cx="1172.5" cy="792" r="6"/>
+    <circle cx="1330" cy="792" r="6"/>
+  </g>
+  <g font-size="14" font-weight="700" fill="#13202d" text-anchor="middle">
+    <text x="70" y="774">5 PM</text><text x="385" y="774">11 PM</text><text x="700" y="774">5 AM</text>
+    <text x="857.5" y="774">8 AM</text><text x="1015" y="774">11 AM</text><text x="1172.5" y="774">2 PM</text>
+    <text x="1330" y="774">5 PM</text>
+  </g>
+  <g font-size="12.5" fill="#6b7a88" text-anchor="middle">
+    <text x="70" y="816">day before</text><text x="385" y="816">night before</text><text x="700" y="816">early morning</text>
+    <text x="857.5" y="816">morning</text><text x="1015" y="816">late morning</text><text x="1172.5" y="816">afternoon</text>
+    <text x="1330" y="816">late afternoon</text>
+  </g>
+  <text x="1360" y="856" font-size="12.5" fill="#6b7a88" text-anchor="end">Each contract settles the next morning on the official report</text>
+</svg>

@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+
+# Secrets: never commit keys or the environment file
+.env
+*.key
+*.pem
+*.p12
+*.pfx
+id_rsa*
+id_ed25519*
+deploy_keys/
+*passphrase*
+
+# Local data, databases and logs
+/data/
+*.sqlite
+*.sqlite3
+*.db
+*.log
+
+# Private: live configs, trained models, fitted weights
+config/*
+!config/example.yaml
+wxbot/ml/artifacts/
+wxbot/models/calib_daily_temp.json
