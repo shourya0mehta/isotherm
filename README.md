@@ -4,7 +4,7 @@
 </picture>
 
 **Isotherm forecasts the day's high temperature and trades on it.** It runs around the clock on
-[Kalshi](https://kalshi.com)'s daily temperature markets at 24 U.S. airports, built entirely on free NOAA and ECMWF
+[Kalshi](https://kalshi.com)'s daily temperature markets in 24 U.S. cities, built entirely on free NOAA and ECMWF
 data. Each forecast is blended with live market prices, and Isotherm only trades where the price sits far enough from
 its estimate. It has traded real money since October 2026.
 
@@ -13,10 +13,10 @@ its estimate. It has traded real money since October 2026.
 
 [![tests](https://github.com/shourya0mehta/isotherm/actions/workflows/tests.yml/badge.svg)](https://github.com/shourya0mehta/isotherm/actions/workflows/tests.yml)
 
-![Map of the day's high across the lower 48 on October 11, 2026, with the official high at the 24 airports Isotherm trades](docs/assets/map-labeled.webp)
+![Map of the day's high across the lower 48 on October 11, 2026, with the official high at the 24 cities Isotherm trades](docs/assets/map-labeled.webp)
 
 <sub>The day's high across the lower 48 on Sunday, October 11, 2026, from NOAA's 3 km HRRR model, with the official
-National Weather Service high at each airport Isotherm trades. Lines are isotherms, 10 °F apart.</sub>
+National Weather Service high in each city Isotherm trades. Lines are isotherms, 10 °F apart.</sub>
 
 ## The dashboard
 
@@ -31,7 +31,7 @@ laptop running anywhere.
 
 ## A day in the market
 
-Every airport gets a new market each day, split into 2 °F brackets. Isotherm re-forecasts at set times, keeps its
+Every city gets a new market each day, split into 2 °F brackets. Isotherm re-forecasts at set times, keeps its
 quotes fresh in between, and holds every position until the official report settles it.
 
 | Time (Eastern) | What happens |
@@ -70,13 +70,13 @@ A LightGBM classifier predicts a probability for every whole degree of the offic
 from the evening before through the afternoon of the day.
 
 - It predicts offsets from an anchor (the latest blended NOAA forecast, raised to the observed high once the day has
-  started), so one model serves all 24 airports and all hours.
+  started), so one model serves all 24 cities and all hours.
 - Predicting whole degrees directly means the rounding rules, the gap between hourly and 5-minute peaks, and the
   fact that the high can't drop below what has already happened are all learned from labels instead of assumed.
-- Station inputs and each model's recent misses at that airport let it learn local biases.
+- Station inputs and each model's recent misses at that station let it learn local biases.
 
 The evening before, its average miss is **1.57 °F** against **1.92 °F** for the best single NOAA product, and it beats
-that product at all 24 airports.
+that product in all 24 cities.
 
 ### 3. Blending with the market (`wxbot/ml/live.py`, `wxbot/ml/pool_fit.py`, `research/ml/cgep.py`)
 

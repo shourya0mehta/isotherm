@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Isotherm: autonomous trading for weather markets</title>
-<meta name="description" content="Isotherm forecasts the official daily high at 24 U.S. airports from free NOAA and ECMWF data, blends it with Kalshi's market prices, and trades where the price is off.">
+<meta name="description" content="Isotherm forecasts the official daily high in 24 U.S. cities from free NOAA and ECMWF data, blends it with Kalshi's market prices, and trades where the price is off.">
 <meta property="og:title" content="Isotherm">
-<meta property="og:description" content="Autonomous trading for weather markets. Forecasts the official daily high at 24 U.S. airports and trades Kalshi's temperature markets on it.">
+<meta property="og:description" content="Autonomous trading for weather markets. Forecasts the official daily high in 24 U.S. cities and trades Kalshi's temperature markets on it.">
 <meta property="og:image" content="https://shourya0mehta.github.io/isotherm/assets/og.png">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
@@ -18,6 +18,7 @@
 <style>
 :root {
   --paper: #fbfcfc;
+  --card: #ffffff;
   --ink: #142029;
   --ink-2: #42515d;
   --ink-3: #6b7883;
@@ -25,252 +26,590 @@
   --wash: #eef2f4;
   --link: #1c5fae;
   --navy: #1d3b53;
+  --warm: #e2724a;
+  --cool: #5f8fc6;
+  --mkt: #aab5be;
+  --good: #2f8a5b;
   --display: "Newsreader", Georgia, serif;
   --body: "Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --ease: cubic-bezier(.2, .7, .2, 1);
   color-scheme: light;
 }
 * { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; scroll-padding-top: 76px; }
 body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--body); font-size: 17px; line-height: 1.6;
   font-variant-numeric: tabular-nums; }
 a { color: var(--link); text-underline-offset: 3px; text-decoration-thickness: 1px; }
 a:hover { text-decoration-thickness: 2px; }
 :focus-visible { outline: 3px solid #2a78d6; outline-offset: 3px; border-radius: 4px; }
 img { max-width: 100%; display: block; }
+button { font: inherit; color: inherit; }
 .wrap { max-width: 72rem; margin: 0 auto; padding-inline: clamp(16px, 4vw, 40px); }
 
+/* reveal on scroll (the brief asks for it; one easing, short stagger) */
+.js [data-reveal] { opacity: 0; transform: translateY(26px);
+  transition: opacity .7s var(--ease), transform .85s var(--ease); transition-delay: calc(var(--i, 0) * 80ms); }
+.js [data-reveal].is-in { opacity: 1; transform: none; }
+
 /* top bar */
-.top { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 22px; }
+.topbar { position: sticky; top: 0; z-index: 30; transition: background .3s, box-shadow .3s; }
+.topbar.scrolled { background: rgba(251, 252, 252, .88); -webkit-backdrop-filter: saturate(1.4) blur(10px);
+  backdrop-filter: saturate(1.4) blur(10px); box-shadow: 0 1px 0 var(--rule); }
+.top { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 16px; }
+.progress { position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--ink);
+  transform-origin: 0 50%; transform: scaleX(0); }
 .brand { display: inline-flex; align-items: center; gap: 10px; color: var(--ink); text-decoration: none;
   font-family: var(--display); font-weight: 600; font-size: 26px; letter-spacing: -0.01em; line-height: 1; }
-.brand img { width: 30px; height: 30px; }
-.nav { display: flex; gap: 22px; font-size: 15px; }
-.nav a { color: var(--ink-2); text-decoration: none; }
-.nav a:hover { color: var(--ink); text-decoration: underline; }
+.brand img { width: 30px; height: 30px; transition: transform .5s var(--ease); }
+.brand:hover img { transform: rotate(-8deg) scale(1.06); }
+.nav { display: flex; gap: 6px; font-size: 15px; }
+.nav a { color: var(--ink-2); text-decoration: none; padding: 6px 10px; border-radius: 8px; transition: background .2s, color .2s; }
+.nav a:hover { background: var(--wash); color: var(--ink); }
+.nav a.on { color: var(--ink); background: var(--wash); }
+.nav a.gh { border: 1.5px solid var(--navy); color: var(--navy); font-weight: 600; margin-left: 6px; }
+.nav a.gh:hover { background: var(--navy); color: #fff; }
 
 /* hero */
 .hero { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 24px 48px; align-items: start;
-  padding-block: clamp(28px, 6vw, 64px) 32px; border-bottom: 2px solid var(--ink); }
-h1 { font-family: var(--display); font-weight: 500; font-size: clamp(36px, 4.4vw, 54px); line-height: 1.05;
+  padding-block: clamp(28px, 6vw, 60px) 32px; border-bottom: 2px solid var(--ink); }
+h1 { font-family: var(--display); font-weight: 500; font-size: clamp(36px, 4.4vw, 56px); line-height: 1.05;
   letter-spacing: -0.015em; margin: 0; font-variation-settings: "opsz" 72; text-wrap: balance; }
+.js h1 .w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: .14em; margin-bottom: -.14em; }
+.js h1 .w > span { display: inline-block; transform: translateY(108%);
+  transition: transform .95s var(--ease); transition-delay: calc(var(--i) * 55ms + 80ms); }
+.js h1.go .w > span { transform: none; }
 .lede { margin: 0; padding-top: 6px; color: var(--ink-2); max-width: 34rem; }
 .actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-top: 20px; }
-.btn { display: inline-flex; align-items: center; min-height: 44px; padding: 0 18px; border-radius: 8px;
-  font-weight: 600; font-size: 15px; text-decoration: none; border: 1.5px solid var(--navy); color: var(--navy); }
+.btn { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 18px; border-radius: 9px;
+  font-weight: 600; font-size: 15px; text-decoration: none; border: 1.5px solid var(--navy); color: var(--navy);
+  background: transparent; cursor: pointer; transition: transform .2s var(--ease), background .2s, color .2s; }
 .btn.primary { background: var(--navy); color: #fff; }
-.btn:hover { text-decoration: none; background: var(--wash); }
+.btn:hover { text-decoration: none; transform: translateY(-2px); background: var(--wash); }
 .btn.primary:hover { background: #142c40; }
-.status { display: inline-flex; align-items: center; gap: 8px; font-size: 15px; color: var(--ink-2); margin-left: 6px; }
-.status::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #2f8a5b; }
+.live { margin: 18px 0 0; display: grid; gap: 4px; font-size: 15px; color: var(--ink-2); }
+.live span { display: inline-flex; align-items: center; gap: 9px; }
+.dot-live { position: relative; width: 9px; height: 9px; border-radius: 50%; background: var(--good); flex: none; }
+.dot-live::after { content: ""; position: absolute; inset: -4px; border-radius: 50%; border: 2px solid var(--good);
+  opacity: 0; animation: ping 2.4s var(--ease) infinite; }
+@keyframes ping { 0% { transform: scale(.5); opacity: .7; } 100% { transform: scale(1.6); opacity: 0; } }
+.clock-ico { width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid var(--ink-3); flex: none; }
 
 /* map */
 .map { margin: 0; padding-block: 28px 8px; }
-.map-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-.map svg { display: block; width: 100%; min-width: 720px; height: auto; }
+.map-scroll { position: relative; }
+.map svg { display: block; width: 100%; height: auto; overflow: visible; }
 .map .iso { font: 500 23px var(--body); fill: var(--ink); fill-opacity: .72; }
-.map .city { font: 500 27px var(--body); fill: var(--ink); paint-order: stroke; stroke: rgba(251, 252, 252, .88);
-  stroke-width: 7px; stroke-linejoin: round; }
+.map .city { font: 500 27px var(--body); fill: var(--ink); paint-order: stroke; stroke: rgba(251, 252, 252, .9);
+  stroke-width: 7px; stroke-linejoin: round; pointer-events: none; }
 .map .city .t { font-weight: 600; }
 .map .call { stroke: var(--ink); stroke-width: 1.6; opacity: .55; }
-.map .dot { fill: var(--ink); stroke: #fff; stroke-width: 3.5; }
+.map .ap { cursor: pointer; outline: none; }
+.map .ap circle { fill: var(--ink); stroke: #fff; stroke-width: 3.5; transform-box: fill-box; transform-origin: center;
+  transition: transform .25s var(--ease), fill .2s; }
+.map .ap .hit { fill: transparent; stroke: none; }
+.map .ap:hover circle.d, .map .ap:focus circle.d, .map .ap.hot circle.d { transform: scale(1.5); fill: var(--warm); }
+.js .map .isos { opacity: 0; transition: opacity .8s ease 1.3s; }
+.js .map.is-in .isos { opacity: 1; }
+.js .map .ap circle.d { transform: scale(0); transition: transform .5s cubic-bezier(.3, 1.6, .5, 1) calc(1.1s + var(--d) * 1.1s), fill .2s; }
+.js .map.is-in .ap circle.d { transform: scale(1); }
+.js .map.is-in .ap:hover circle.d, .js .map.is-in .ap.hot circle.d { transform: scale(1.5); transition-delay: 0s; }
+.js .map .ap .city, .js .map .ap .call { opacity: 0; transition: opacity .6s ease calc(1.35s + var(--d) * 1.1s); }
+.js .map.is-in .ap .city, .js .map.is-in .ap .call { opacity: 1; }
+.tip { position: absolute; z-index: 5; pointer-events: none; background: var(--ink); color: #fff; border-radius: 10px;
+  padding: 8px 12px; font-size: 13.5px; line-height: 1.35; white-space: nowrap; display: grid; gap: 1px;
+  transform: translate(-50%, calc(-100% - 14px)) scale(.96); opacity: 0; transition: opacity .15s, transform .2s var(--ease); }
+.tip.on { opacity: 1; transform: translate(-50%, calc(-100% - 14px)); }
+.tip b { font-weight: 600; font-size: 14.5px; }
+.tip span { color: #c6d0d8; }
+.tip::after { content: ""; position: absolute; left: 50%; bottom: -5px; width: 10px; height: 10px; background: var(--ink);
+  transform: translateX(-50%) rotate(45deg); border-radius: 2px; }
 .map figcaption { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px 32px; align-items: start;
   margin-top: 14px; font-size: 14.5px; color: var(--ink-3); }
 .map figcaption p { margin: 0; max-width: 46rem; }
-.legend { display: grid; grid-template-columns: repeat(16, 18px); grid-template-rows: 12px auto; column-gap: 0; }
+.legend { display: grid; grid-template-columns: repeat(16, 18px); grid-template-rows: 12px auto; }
 .legend span { height: 12px; }
 .legend span:first-child { border-radius: 3px 0 0 3px; }
 .legend span:nth-child(16) { border-radius: 0 3px 3px 0; }
 .legend b { grid-row: 2; font-weight: 500; font-size: 12.5px; color: var(--ink-3); transform: translateX(-50%); }
 
 /* sections */
-section.block { padding-block: clamp(44px, 7vw, 80px); border-top: 1px solid var(--rule); }
+section.block { padding-block: clamp(48px, 7vw, 88px); border-top: 1px solid var(--rule); }
 .head { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 16px 48px; align-items: start; }
-h2 { font-family: var(--display); font-weight: 500; font-size: clamp(28px, 3.4vw, 38px); line-height: 1.12;
-  letter-spacing: -0.01em; margin: 0; font-variation-settings: "opsz" 48; }
+h2 { font-family: var(--display); font-weight: 500; font-size: clamp(30px, 3.6vw, 42px); line-height: 1.1;
+  letter-spacing: -0.012em; margin: 0; font-variation-settings: "opsz" 48; }
 .head p { margin: 0; color: var(--ink-2); max-width: 38rem; }
-h3 { font-size: 17px; font-weight: 600; margin: 0 0 6px; line-height: 1.35; }
+h3 { font-size: 19px; font-weight: 600; margin: 0 0 8px; line-height: 1.3; }
+
+/* how it works: pipeline */
+.pipe { margin-top: 40px; position: relative; }
+.nodes { list-style: none; margin: 0; padding: 0 0 54px; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 30px; position: relative; }
+.nodes::before { content: ""; position: absolute; left: 6%; right: 6%; top: 46px; height: 2px;
+  background-image: repeating-linear-gradient(90deg, var(--ink-3) 0 7px, transparent 7px 15px); background-size: 15px 2px;
+  animation: flow .8s linear infinite; opacity: .55; }
+@keyframes flow { to { background-position: 15px 0; } }
+.nodes li { position: relative; }
+.node { position: relative; z-index: 1; display: block; width: 100%; height: 100%; text-align: left; cursor: pointer;
+  background: var(--paper); border: 1.5px solid var(--rule); border-radius: 12px; padding: 14px 14px 16px;
+  overflow: hidden; transition: border-color .25s, background .3s, color .3s, transform .3s var(--ease); }
+.node:hover { border-color: var(--ink-3); transform: translateY(-3px); }
+.node[aria-selected="true"] { background: var(--ink); border-color: var(--ink); color: #fff; transform: translateY(-3px); }
+.node .n { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%;
+  border: 1.5px solid currentColor; font-size: 13px; font-weight: 600; margin-bottom: 10px; opacity: .8; }
+.node .t { display: block; font-weight: 600; font-size: 16px; line-height: 1.3; }
+.node .s { display: block; font-size: 13.5px; color: var(--ink-3); line-height: 1.4; margin-top: 3px; }
+.node[aria-selected="true"] .s { color: #b7c2cb; }
+.node .bar { position: absolute; left: 0; bottom: 0; height: 3px; width: 0; background: var(--warm); }
+.node.run .bar { animation: fillbar var(--dur, 7s) linear forwards; }
+@keyframes fillbar { to { width: 100%; } }
+.loop { position: absolute; left: 30%; width: 60%; bottom: 10px; height: 30px; border: 2px dashed var(--ink-3);
+  border-top: 0; border-radius: 0 0 20px 20px; opacity: .6; }
+.loop::before { content: ""; position: absolute; left: -7px; top: -6px; border: 6px solid transparent;
+  border-bottom: 8px solid var(--ink-3); border-top: 0; }
+.loop span { position: absolute; left: 50%; bottom: -12px; transform: translateX(-50%); background: var(--paper);
+  padding: 0 12px; font-size: 13.5px; color: var(--ink-2); white-space: nowrap; }
+.stage { margin-top: 30px; border: 1px solid var(--rule); border-radius: 18px; background: var(--card);
+  padding: clamp(20px, 3.2vw, 40px); position: relative; }
+.panel { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 7fr); gap: 28px 52px; align-items: start; }
+.panels { display: grid; }
+.panel { grid-area: 1 / 1; }
+.panel[hidden] { display: grid; visibility: hidden; pointer-events: none; }
+.panel.enter .copy, .panel.enter .viz { animation: panelIn .55s var(--ease) both; }
+.panel.enter .viz { animation-delay: .08s; }
+@keyframes panelIn { from { opacity: 0; transform: translateY(14px); } }
+.copy p { margin: 0 0 12px; color: var(--ink-2); }
+.copy .hint { font-size: 14.5px; color: var(--ink-3); margin-top: 16px; }
+.kv { font-family: var(--display); font-size: 1.12em; font-weight: 600; color: var(--ink); white-space: nowrap; }
+.ctrl { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 18px;
+  font-size: 14.5px; color: var(--ink-3); }
+.ctrl .btns { display: flex; gap: 8px; }
+.ibtn { min-height: 38px; padding: 0 14px; border-radius: 9px; border: 1.5px solid var(--rule); background: var(--card);
+  cursor: pointer; font-size: 14px; font-weight: 600; color: var(--ink-2); transition: border-color .2s, transform .2s var(--ease); }
+.ibtn:hover { border-color: var(--ink-3); transform: translateY(-1px); }
+
+/* viz: shared */
+.viz { min-width: 0; }
+.vcap { font-size: 13.5px; color: var(--ink-3); margin: 10px 0 0; }
+.seg { display: inline-flex; padding: 3px; border-radius: 10px; background: var(--wash); gap: 2px; margin-bottom: 18px; flex-wrap: wrap; }
+.seg button { border: 0; background: transparent; padding: 7px 12px; border-radius: 8px; cursor: pointer; font-size: 14px;
+  color: var(--ink-2); font-weight: 500; transition: background .2s, color .2s; }
+.seg button[aria-pressed="true"] { background: var(--card); color: var(--ink); font-weight: 600; box-shadow: 0 1px 2px rgba(20, 32, 41, .12); }
+.slider { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; align-items: center; font-size: 14.5px;
+  color: var(--ink-2); margin-top: 14px; }
+.slider output { font-weight: 600; color: var(--ink); }
+.slider input { grid-column: 1 / -1; width: 100%; accent-color: var(--ink); }
+
+/* viz 1: data timing */
+.feed { display: grid; gap: 9px; position: relative; }
+.frow { display: grid; grid-template-columns: 172px minmax(0, 1fr) 128px; gap: 12px; align-items: center; font-size: 14.5px; }
+.frow .src { color: var(--ink); font-weight: 500; }
+.ftrack { position: relative; height: 10px; border-radius: 5px; background: var(--wash); }
+.ftrack .span { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 5px; border: 1.5px dashed var(--mkt); }
+.ftrack .fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 5px; background: var(--cool); width: 0; }
+.frow.ok .ftrack .fill { background: var(--ink); }
+.frow .st { font-size: 13.5px; color: var(--ink-3); }
+.frow.ok .st { color: var(--good); font-weight: 600; }
+.nowline { position: absolute; top: -8px; bottom: -8px; width: 2px; background: var(--warm); border-radius: 1px; pointer-events: none; }
+.nowline b { position: absolute; top: -22px; left: 50%; transform: translateX(-50%); font-size: 12.5px; color: var(--warm);
+  white-space: nowrap; font-weight: 600; }
+.feed-wrap { position: relative; padding-top: 24px; }
+
+/* viz 2: forecast */
+.chart { position: relative; height: 230px; display: grid; grid-template-columns: repeat(13, minmax(0, 1fr)); gap: 6px;
+  align-items: end; border-bottom: 1.5px solid var(--ink); }
+.chart .col { position: relative; height: 100%; display: flex; align-items: flex-end; justify-content: center; }
+.chart .b { width: 100%; border-radius: 5px 5px 0 0; background: var(--cool); height: 0;
+  transition: height .7s var(--ease), background .3s; }
+.chart .b.top { background: var(--ink); }
+.chart .pct { position: absolute; left: 0; right: 0; text-align: center; font-size: 12.5px; font-weight: 600; color: var(--ink);
+  transition: bottom .7s var(--ease), opacity .3s; }
+.xl { display: grid; grid-template-columns: repeat(13, minmax(0, 1fr)); gap: 6px; font-size: 12.5px; color: var(--ink-3);
+  text-align: center; margin-top: 6px; }
+.passed { position: absolute; left: 0; top: 0; bottom: 0; background: repeating-linear-gradient(135deg, rgba(107, 120, 131, .14) 0 6px, transparent 6px 12px);
+  border-right: 1.5px dashed var(--ink-3); width: 0; opacity: 0; transition: width .6s var(--ease), opacity .4s; display: flex; align-items: flex-start; }
+.passed span { font-size: 12.5px; color: var(--ink-2); padding: 6px 8px; white-space: nowrap; }
+
+/* viz 3: blend */
+.legend2 { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 13.5px; color: var(--ink-2); margin-bottom: 12px; }
+.legend2 i { display: inline-block; width: 11px; height: 11px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+.groups { height: 210px; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px; align-items: end;
+  border-bottom: 1.5px solid var(--ink); }
+.grp { height: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 3px; align-items: end; position: relative; }
+.grp .b { border-radius: 4px 4px 0 0; height: 0; transition: height .5s var(--ease); }
+.grp .m { background: var(--mkt); } .grp .f { background: var(--cool); } .grp .p { background: var(--ink); }
+.grp .v { position: absolute; right: 0; width: 33%; text-align: center; font-size: 12px; font-weight: 600; transition: bottom .5s var(--ease); }
+.xl6 { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px; font-size: 12.5px; color: var(--ink-3);
+  text-align: center; margin-top: 6px; }
+.formula { margin-top: 14px; font-family: var(--display); font-size: 19px; color: var(--ink); }
+.formula small { font-family: var(--body); font-size: 13.5px; color: var(--ink-3); display: block; margin-top: 2px; }
+
+/* viz 4: trade */
+.ttable { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+.ttable th { text-align: left; font-weight: 500; color: var(--ink-3); font-size: 13px; padding: 0 8px 8px 0; border-bottom: 1.5px solid var(--ink); }
+.ttable td { padding: 9px 8px 9px 0; border-bottom: 1px solid var(--rule); transition: background .3s; }
+.ttable td.num { font-variant-numeric: tabular-nums; }
+.ttable tr.sig td { background: #fdf0ea; }
+.pill { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 12.5px; font-weight: 600; background: var(--wash); color: var(--ink-3); }
+.pill.buy { background: var(--warm); color: #fff; }
+.checks2 { list-style: none; margin: 16px 0 0; padding: 0; display: grid; gap: 7px; font-size: 14.5px; }
+.checks2 li { display: flex; align-items: center; gap: 10px; color: var(--ink-2); opacity: .25; transform: translateX(-6px);
+  transition: opacity .35s, transform .35s var(--ease); }
+.checks2 li.on { opacity: 1; transform: none; }
+.checks2 .ck { width: 18px; height: 18px; border-radius: 50%; background: var(--good); color: #fff; display: grid; place-items: center;
+  font-size: 11px; font-weight: 700; flex: none; }
+.checks2 li.send { color: var(--ink); font-weight: 600; }
+.checks2 li.send .ck { background: var(--warm); }
+.wait { margin-top: 16px; font-size: 14.5px; color: var(--ink-2); padding: 12px 14px; border-radius: 10px; background: var(--wash); }
+
+/* viz 5: settle */
+.report { display: flex; align-items: baseline; gap: 18px; flex-wrap: wrap; padding: 18px 20px; border-radius: 14px;
+  background: var(--wash); }
+.report .big { font-family: var(--display); font-size: 64px; line-height: .9; font-weight: 600; }
+.report .lbl { font-size: 14.5px; color: var(--ink-2); }
+.payrow { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; margin-top: 16px; }
+.payrow div { border: 1.5px solid var(--rule); border-radius: 10px; padding: 9px 6px; text-align: center; font-size: 13px;
+  color: var(--ink-3); transition: background .4s, color .4s, border-color .4s, transform .4s var(--ease); }
+.payrow div b { display: block; font-size: 15px; color: var(--ink-2); }
+.payrow div.win { background: var(--ink); border-color: var(--ink); color: #c6d0d8; transform: translateY(-4px); }
+.payrow div.win b { color: #fff; }
+.pnl { margin-top: 16px; font-size: 15px; color: var(--ink-2); }
+.pnl b { color: var(--good); }
+.back { margin-top: 12px; display: inline-flex; align-items: center; gap: 10px; font-size: 14.5px; color: var(--ink-2);
+  padding: 8px 12px; border-radius: 10px; border: 1.5px dashed var(--ink-3); }
+.back svg { animation: spin 3s linear infinite; }
+@keyframes spin { to { transform: rotate(-360deg); } }
 
 /* a day in the market */
-.day { list-style: none; margin: 36px 0 0; padding: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr));
-  border-top: 2px solid var(--ink); }
-.day li { position: relative; padding: 18px 18px 0 0; }
+.day { list-style: none; margin: 40px 0 0; padding: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr));
+  position: relative; }
+.day::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 2px; background: var(--ink);
+  transform-origin: 0 50%; }
+.js .day::before { transform: scaleX(0); transition: transform 1.4s var(--ease) .1s; }
+.js .day.is-in::before { transform: scaleX(1); }
+.day li { position: relative; padding: 20px 18px 0 0; }
 .day li::before { content: ""; position: absolute; top: -7px; left: 0; width: 12px; height: 12px; border-radius: 50%;
-  background: var(--paper); border: 2px solid var(--ink); }
+  background: var(--paper); border: 2px solid var(--ink); transition: transform .3s var(--ease), background .3s; }
+.day li:hover::before { transform: scale(1.35); background: var(--warm); border-color: var(--warm); }
 .day li.settle::before { background: var(--ink); }
+.js .day li { opacity: 0; transform: translateY(16px); transition: opacity .6s var(--ease), transform .7s var(--ease);
+  transition-delay: calc(.25s + var(--i) * 170ms); }
+.js .day.is-in li { opacity: 1; transform: none; }
 .day time { display: block; font-family: var(--display); font-size: 21px; font-weight: 600; line-height: 1.2; margin-bottom: 6px; }
 .day p { margin: 0; font-size: 15px; color: var(--ink-2); line-height: 1.5; }
 
 /* dashboard */
-.shots { position: relative; margin: 40px 0 0; padding-right: clamp(0px, 14vw, 170px); }
-.shots .desk { border: 1px solid var(--rule); border-radius: 10px; width: 100%; height: auto; }
+.shots { position: relative; margin: 44px 0 0; padding-right: clamp(0px, 14vw, 170px); }
+.shots .desk { border: 1px solid var(--rule); border-radius: 12px; width: 100%; height: auto; }
 .shots .phone { position: absolute; right: 0; bottom: -28px; width: clamp(150px, 24vw, 280px); height: auto;
   border: 7px solid var(--ink); border-radius: 30px; background: var(--paper);
-  box-shadow: 0 18px 40px -18px rgba(20, 32, 41, .45); }
+  box-shadow: 0 18px 40px -18px rgba(20, 32, 41, .45); will-change: transform; }
+.js .shots .phone { opacity: 0; transition: opacity .8s var(--ease) .35s; }
+.js .shots.is-in .phone { opacity: 1; }
 .shots-cap { margin: 52px 0 0; font-size: 14.5px; color: var(--ink-3); }
 
-/* how it works */
-.steps { list-style: none; margin: 40px 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 36px 56px; counter-reset: step; }
-.steps li { counter-increment: step; display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 0 8px; }
-.steps li::before { content: counter(step); font-family: var(--display); font-size: 30px; font-weight: 500; line-height: 1;
-  color: var(--ink-3); }
-.steps p { margin: 0; color: var(--ink-2); }
-.figure { font-family: var(--display); font-size: 1.12em; line-height: 1; font-weight: 600; color: var(--ink); white-space: nowrap; }
-
-/* testing */
-.checks { list-style: none; margin: 36px 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0 56px; }
+/* tested */
+.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; margin: 40px 0 0; }
+.stats > div { border-top: 2px solid var(--ink); padding-top: 14px; }
+.stats b { display: block; font-family: var(--display); font-weight: 500; font-size: clamp(34px, 4vw, 48px); line-height: 1.05;
+  letter-spacing: -0.01em; }
+.stats .lbl { display: block; font-size: 14.5px; color: var(--ink-2); margin-top: 6px; }
+.checks { list-style: none; margin: 36px 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 56px; }
 .checks li { padding: 14px 0; border-top: 1px solid var(--rule); color: var(--ink-2); }
 .checks strong { color: var(--ink); font-weight: 600; }
 
 /* stack */
 .stack { display: flex; flex-wrap: wrap; gap: 10px; list-style: none; padding: 0; margin: 28px 0 0; }
-.stack li { padding: 6px 12px; border: 1px solid var(--rule); border-radius: 6px; font-size: 15px; color: var(--ink-2); background: #fff; }
+.stack li { padding: 7px 13px; border: 1px solid var(--rule); border-radius: 8px; font-size: 15px; color: var(--ink-2);
+  background: var(--card); transition: transform .2s var(--ease), border-color .2s; }
+.stack li:hover { transform: translateY(-2px); border-color: var(--ink-3); }
 
-footer { border-top: 2px solid var(--ink); padding-block: 28px 56px; display: grid;
-  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 16px 48px; font-size: 15px; color: var(--ink-2); }
-footer p { margin: 0 0 8px; max-width: 36rem; }
+footer { border-top: 2px solid var(--ink); padding-block: 28px 56px; display: flex; justify-content: space-between;
+  gap: 16px 48px; flex-wrap: wrap; font-size: 15px; color: var(--ink-2); }
+footer p { margin: 0 0 6px; }
 footer .who { text-align: right; }
 
+@media (max-width: 980px) {
+  .nodes { gap: 14px; }
+  .panel { grid-template-columns: minmax(0, 1fr); }
+  .frow { grid-template-columns: 150px minmax(0, 1fr) 112px; }
+}
 @media (max-width: 860px) {
-  .hero, .head, footer { grid-template-columns: minmax(0, 1fr); }
-  .day { grid-template-columns: minmax(0, 1fr); border-top: 0; border-left: 2px solid var(--ink); margin-left: 6px; }
+  .hero, .head { grid-template-columns: minmax(0, 1fr); }
+  .nav a.hide-sm { display: none; }
+  .nodes { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; padding: 4px 2px 14px; gap: 10px; }
+  .nodes::before, .loop { display: none; }
+  .nodes li { flex: 0 0 158px; scroll-snap-align: start; }
+  .day { grid-template-columns: minmax(0, 1fr); margin-left: 6px; }
+  .day::before { top: 0; bottom: 0; left: 0; right: auto; width: 2px; height: auto; transform-origin: 50% 0; }
+  .js .day::before { transform: scaleY(0); }
+  .js .day.is-in::before { transform: scaleY(1); }
   .day li { padding: 0 0 22px 24px; }
-  .day li::before { top: 5px; left: -7px; }
-  .steps, .checks { grid-template-columns: minmax(0, 1fr); }
+  .day li::before { top: 5px; left: -5px; }
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .checks { grid-template-columns: minmax(0, 1fr); }
   .map figcaption { grid-template-columns: minmax(0, 1fr); }
   footer .who { text-align: left; }
-  .nav a.hide-sm { display: none; }
 }
 @media (max-width: 720px) {
-  .map svg { min-width: 0; }
   .map .city, .map .iso, .map .call { display: none; }
-  .map .dot { r: 20px; stroke-width: 7px; }
+  .map .ap circle.d { r: 20px; stroke-width: 7px; }
+  .frow { grid-template-columns: minmax(0, 1fr) 96px; }
+  .frow .ftrack { grid-column: 1 / -1; grid-row: 2; }
+  .payrow { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .chart, .xl { gap: 3px; }
+  .groups, .xl6 { gap: 6px; }
 }
 @media (max-width: 560px) {
   body { font-size: 16px; }
   .shots { padding-right: 0; }
   .shots .phone { position: static; width: 62%; margin: -40px 0 0 auto; }
   .shots-cap { margin-top: 18px; }
+  .ttable th:nth-child(3), .ttable td:nth-child(3) { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; transition-delay: 0s !important; }
+  .js [data-reveal], .js .day li, .js .shots .phone { opacity: 1; transform: none; }
+  .js .map .isos, .js .map .ap .city, .js .map .ap .call { opacity: 1; }
+  .js .map .ap circle.d { transform: none; }
+  .js .day::before { transform: none; }
 }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header class="top">
+<div class="topbar" id="topbar">
+  <div class="wrap top">
     <a class="brand" href="#top" aria-label="Isotherm home"><img src="assets/mark.svg" alt="">Isotherm</a>
     <nav class="nav" aria-label="Sections">
+      <a class="hide-sm" href="#how">How it works</a>
       <a class="hide-sm" href="#day">A day in the market</a>
       <a class="hide-sm" href="#dashboard">Dashboard</a>
-      <a href="#how">How it works</a>
-      <a href="https://github.com/shourya0mehta/isotherm">GitHub</a>
+      <a class="gh" href="https://github.com/shourya0mehta/isotherm">GitHub</a>
     </nav>
-  </header>
+  </div>
+  <div class="progress" id="progress"></div>
+</div>
 
+<div class="wrap">
   <main id="top">
     <section class="hero" aria-labelledby="hero-h">
       <h1 id="hero-h">Isotherm forecasts the day&rsquo;s high temperature and trades on it.</h1>
-      <div>
-        <p class="lede">It runs around the clock on Kalshi&rsquo;s daily temperature markets at 24 U.S. airports, built entirely on
+      <div data-reveal style="--i: 6">
+        <p class="lede">It runs around the clock on Kalshi&rsquo;s daily temperature markets in 24 U.S. cities, built entirely on
           free NOAA and ECMWF data. Each forecast is blended with live market prices, and Isotherm only trades where the
           price sits far enough from its estimate.</p>
         <div class="actions">
-          <a class="btn primary" href="https://github.com/shourya0mehta/isotherm">View the code</a>
-          <a class="btn" href="#how">How it works</a>
-          <span class="status">Trading real money since October 2026</span>
+          <a class="btn primary" href="#how">See how it works</a>
+          <a class="btn" href="https://github.com/shourya0mehta/isotherm">View the code</a>
+        </div>
+        <div class="live">
+          <span><i class="dot-live" aria-hidden="true"></i>Trading real money since October 2026</span>
+          <span><i class="clock-ico" aria-hidden="true"></i><span id="next-run">Forecasts refresh six times a day</span></span>
         </div>
       </div>
     </section>
 
-    <figure class="map" aria-labelledby="map-cap">
+    <figure class="map" aria-labelledby="map-cap" data-reveal>
       <div class="map-scroll">
-<svg viewBox="0 0 2400 1309" role="img" aria-labelledby="map-title"><title id="map-title">Map of the day's high temperature across the lower 48 states on October 11, 2026, with the official high at 24 airports: Austin 94; Dallas 91; Houston 90; Miami 90; Minneapolis 90; Oklahoma City 90; San Antonio 90; Phoenix 89; New Orleans 87; Denver 85; Chicago 78; Las Vegas 74; Los Angeles 74; San Diego 73; Atlanta 70; Washington 67; Louisville 67; Philadelphia 65; San Francisco 65; Newark 62; Trenton 61; Boston 60; New York 60; Seattle 60.</title><image href="assets/map.webp" width="2400" height="1309"/><g><text class="iso" x="628" y="254" text-anchor="middle" dominant-baseline="central" transform="rotate(-43.7 628 254)">30°</text><text class="iso" x="899" y="146" text-anchor="middle" dominant-baseline="central" transform="rotate(-39.7 899 146)">40°</text><text class="iso" x="305" y="587" text-anchor="middle" dominant-baseline="central" transform="rotate(-284.3 305 587)">50°</text><text class="iso" x="652" y="526" text-anchor="middle" dominant-baseline="central" transform="rotate(-3.6 652 526)">50°</text><text class="iso" x="223" y="232" text-anchor="middle" dominant-baseline="central" transform="rotate(-57.9 223 232)">60°</text><text class="iso" x="769" y="709" text-anchor="middle" dominant-baseline="central" transform="rotate(-318.9 769 709)">60°</text><text class="iso" x="1233" y="194" text-anchor="middle" dominant-baseline="central" transform="rotate(-56.4 1233 194)">60°</text><text class="iso" x="1978" y="240" text-anchor="middle" dominant-baseline="central" transform="rotate(-60.9 1978 240)">60°</text><text class="iso" x="1084" y="424" text-anchor="middle" dominant-baseline="central" transform="rotate(-74.3 1084 424)">70°</text><text class="iso" x="1498" y="269" text-anchor="middle" dominant-baseline="central" transform="rotate(-42.0 1498 269)">70°</text><text class="iso" x="1749" y="628" text-anchor="middle" dominant-baseline="central" transform="rotate(-50.7 1749 628)">70°</text><text class="iso" x="874" y="960" text-anchor="middle" dominant-baseline="central" transform="rotate(-326.9 874 960)">90°</text><text class="iso" x="1052" y="624" text-anchor="middle" dominant-baseline="central" transform="rotate(-45.7 1052 624)">90°</text><text class="iso" x="1112" y="1250" text-anchor="middle" dominant-baseline="central" transform="rotate(-286.4 1112 1250)">90°</text><text class="iso" x="1265" y="797" text-anchor="middle" dominant-baseline="central" transform="rotate(-343.0 1265 797)">90°</text></g><g><line class="call" x1="1990" y1="435" x2="2140" y2="405"/><line class="call" x1="1984" y1="441" x2="2140" y2="448"/><line class="call" x1="1965" y1="466" x2="2140" y2="491"/><line class="call" x1="1955" y1="489" x2="2140" y2="534"/><line class="call" x1="1900" y1="553" x2="2140" y2="577"/></g><g><circle class="dot" cx="1660" cy="856" r="8.5"/><circle class="dot" cx="1122" cy="1063" r="8.5"/><circle class="dot" cx="2073" cy="331" r="8.5"/><circle class="dot" cx="1900" cy="553" r="8.5"/><circle class="dot" cx="862" cy="581" r="8.5"/><circle class="dot" cx="1148" cy="930" r="8.5"/><circle class="dot" cx="1984" cy="441" r="8.5"/><circle class="dot" cx="1224" cy="1089" r="8.5"/><circle class="dot" cx="437" cy="708" r="8.5"/><circle class="dot" cx="289" cy="783" r="8.5"/><circle class="dot" cx="1484" cy="477" r="8.5"/><circle class="dot" cx="1897" cy="1209" r="8.5"/><circle class="dot" cx="1278" cy="341" r="8.5"/><circle class="dot" cx="1438" cy="1060" r="8.5"/><circle class="dot" cx="1990" cy="435" r="8.5"/><circle class="dot" cx="1125" cy="808" r="8.5"/><circle class="dot" cx="1955" cy="489" r="8.5"/><circle class="dot" cx="539" cy="857" r="8.5"/><circle class="dot" cx="324" cy="852" r="8.5"/><circle class="dot" cx="1088" cy="1095" r="8.5"/><circle class="dot" cx="1579" cy="643" r="8.5"/><circle class="dot" cx="310" cy="107" r="8.5"/><circle class="dot" cx="180" cy="570" r="8.5"/><circle class="dot" cx="1965" cy="466" r="8.5"/></g><g><text class="city" x="1677" y="866" text-anchor="start">Atlanta <tspan class="t">70&#176;</tspan></text><text class="city" x="1105" y="1068" text-anchor="end">Austin <tspan class="t">94&#176;</tspan></text><text class="city" x="2090" y="340" text-anchor="start">Boston <tspan class="t">60&#176;</tspan></text><text class="city" x="879" y="590" text-anchor="start">Denver <tspan class="t">85&#176;</tspan></text><text class="city" x="1165" y="939" text-anchor="start">Dallas <tspan class="t">91&#176;</tspan></text><text class="city" x="1242" y="1098" text-anchor="start">Houston <tspan class="t">90&#176;</tspan></text><text class="city" x="454" y="717" text-anchor="start">Las Vegas <tspan class="t">74&#176;</tspan></text><text class="city" x="272" y="792" text-anchor="end">Los Angeles <tspan class="t">74&#176;</tspan></text><text class="city" x="1501" y="486" text-anchor="start">Chicago <tspan class="t">78&#176;</tspan></text><text class="city" x="1914" y="1218" text-anchor="start">Miami <tspan class="t">90&#176;</tspan></text><text class="city" x="1295" y="350" text-anchor="start">Minneapolis <tspan class="t">90&#176;</tspan></text><text class="city" x="1456" y="1070" text-anchor="start">New Orleans <tspan class="t">87&#176;</tspan></text><text class="city" x="1142" y="817" text-anchor="start">Oklahoma City <tspan class="t">90&#176;</tspan></text><text class="city" x="556" y="866" text-anchor="start">Phoenix <tspan class="t">89&#176;</tspan></text><text class="city" x="307" y="861" text-anchor="end">San Diego <tspan class="t">73&#176;</tspan></text><text class="city" x="1071" y="1132" text-anchor="end">San Antonio <tspan class="t">90&#176;</tspan></text><text class="city" x="1596" y="652" text-anchor="start">Louisville <tspan class="t">67&#176;</tspan></text><text class="city" x="328" y="116" text-anchor="start">Seattle <tspan class="t">60&#176;</tspan></text><text class="city" x="197" y="579" text-anchor="start">San Francisco <tspan class="t">65&#176;</tspan></text><text class="city" x="2150" y="414" text-anchor="start">New York <tspan class="t">60&#176;</tspan></text><text class="city" x="2150" y="457" text-anchor="start">Newark <tspan class="t">62&#176;</tspan></text><text class="city" x="2150" y="500" text-anchor="start">Trenton <tspan class="t">61&#176;</tspan></text><text class="city" x="2150" y="543" text-anchor="start">Philadelphia <tspan class="t">65&#176;</tspan></text><text class="city" x="2150" y="586" text-anchor="start">Washington <tspan class="t">67&#176;</tspan></text></g></svg>
+<svg viewBox="0 0 2400 1309" role="group" aria-label="Map of the day's high temperature across the lower 48 states on October 11, 2026"><defs><clipPath id="sweep"><rect id="sweep-rect" x="0" y="0" width="2400" height="1309"/></clipPath></defs><image href="assets/map.webp" width="2400" height="1309" clip-path="url(#sweep)"/><g class="isos" aria-hidden="true"><text class="iso" x="628" y="254" text-anchor="middle" dominant-baseline="central" transform="rotate(-43.7 628 254)">30°</text><text class="iso" x="899" y="146" text-anchor="middle" dominant-baseline="central" transform="rotate(-39.7 899 146)">40°</text><text class="iso" x="305" y="587" text-anchor="middle" dominant-baseline="central" transform="rotate(-284.3 305 587)">50°</text><text class="iso" x="652" y="526" text-anchor="middle" dominant-baseline="central" transform="rotate(-3.6 652 526)">50°</text><text class="iso" x="223" y="232" text-anchor="middle" dominant-baseline="central" transform="rotate(-57.9 223 232)">60°</text><text class="iso" x="769" y="709" text-anchor="middle" dominant-baseline="central" transform="rotate(-318.9 769 709)">60°</text><text class="iso" x="1233" y="194" text-anchor="middle" dominant-baseline="central" transform="rotate(-56.4 1233 194)">60°</text><text class="iso" x="1978" y="240" text-anchor="middle" dominant-baseline="central" transform="rotate(-60.9 1978 240)">60°</text><text class="iso" x="1084" y="424" text-anchor="middle" dominant-baseline="central" transform="rotate(-74.3 1084 424)">70°</text><text class="iso" x="1498" y="269" text-anchor="middle" dominant-baseline="central" transform="rotate(-42.0 1498 269)">70°</text><text class="iso" x="1749" y="628" text-anchor="middle" dominant-baseline="central" transform="rotate(-50.7 1749 628)">70°</text><text class="iso" x="874" y="960" text-anchor="middle" dominant-baseline="central" transform="rotate(-326.9 874 960)">90°</text><text class="iso" x="1052" y="624" text-anchor="middle" dominant-baseline="central" transform="rotate(-45.7 1052 624)">90°</text><text class="iso" x="1112" y="1250" text-anchor="middle" dominant-baseline="central" transform="rotate(-286.4 1112 1250)">90°</text><text class="iso" x="1265" y="797" text-anchor="middle" dominant-baseline="central" transform="rotate(-343.0 1265 797)">90°</text></g><g><g class="ap" tabindex="0" role="img" aria-label="San Francisco, official high 65 degrees" data-city="San Francisco" data-station="San Francisco International Airport" data-high="65" style="--d:0.000"><text class="city" x="197" y="579">San Francisco <tspan class="t">65&#176;</tspan></text><circle class="hit" cx="180" cy="570" r="24"/><circle class="d" cx="180" cy="570" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="Los Angeles, official high 74 degrees" data-city="Los Angeles" data-station="LAX" data-high="74" style="--d:0.057"><text class="city" x="272" y="792" text-anchor="end">Los Angeles <tspan class="t">74&#176;</tspan></text><circle class="hit" cx="289" cy="783" r="24"/><circle class="d" cx="289" cy="783" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="Seattle, official high 60 degrees" data-city="Seattle" data-station="Seattle-Tacoma Airport" data-high="60" style="--d:0.069"><text class="city" x="328" y="116">Seattle <tspan class="t">60&#176;</tspan></text><circle class="hit" cx="310" cy="107" r="24"/><circle class="d" cx="310" cy="107" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="San Diego, official high 73 degrees" data-city="San Diego" data-station="San Diego International Airport" data-high="73" style="--d:0.076"><text class="city" x="307" y="861" text-anchor="end">San Diego <tspan class="t">73&#176;</tspan></text><circle class="hit" cx="324" cy="852" r="24"/><circle class="d" cx="324" cy="852" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="Las Vegas, official high 74 degrees" data-city="Las Vegas" data-station="Harry Reid Airport" data-high="74" style="--d:0.136"><text class="city" x="454" y="717">Las Vegas <tspan class="t">74&#176;</tspan></text><circle class="hit" cx="437" cy="708" r="24"/><circle class="d" cx="437" cy="708" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="Phoenix, official high 89 degrees" data-city="Phoenix" data-station="Sky Harbor Airport" data-high="89" style="--d:0.190"><text class="city" x="556" y="866">Phoenix <tspan class="t">89&#176;</tspan></text><circle class="hit" cx="539" cy="857" r="24"/><circle class="d" cx="539" cy="857" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="Denver, official high 85 degrees" data-city="Denver" data-station="Denver International Airport" data-high="85" style="--d:0.360"><text class="city" x="879" y="590">Denver <tspan class="t">85&#176;</tspan></text><circle class="hit" cx="862" cy="581" r="24"/><circle class="d" cx="862" cy="581" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="San Antonio, official high 90 degrees" data-city="San Antonio" data-station="San Antonio International Airport" data-high="90" style="--d:0.480"><text class="city" x="1071" y="1132" text-anchor="end">San Antonio <tspan class="t">90&#176;</tspan></text><circle class="hit" cx="1088" cy="1095" r="24"/><circle class="d" cx="1088" cy="1095" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="Austin, official high 94 degrees" data-city="Austin" data-station="Austin-Bergstrom Airport" data-high="94" style="--d:0.497"><text class="city" x="1105" y="1068" text-anchor="end">Austin <tspan class="t">94&#176;</tspan></text><circle class="hit" cx="1122" cy="1063" r="24"/><circle class="d" cx="1122" cy="1063" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="Oklahoma City, official high 90 degrees" data-city="Oklahoma City" data-station="Will Rogers Airport" data-high="90" style="--d:0.499"><text class="city" x="1142" y="817">Oklahoma City <tspan class="t">90&#176;</tspan></text><circle class="hit" cx="1125" cy="808" r="24"/><circle class="d" cx="1125" cy="808" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="Dallas, official high 91 degrees" data-city="Dallas" data-station="Dallas/Fort Worth Airport" data-high="91" style="--d:0.512"><text class="city" x="1165" y="939">Dallas <tspan class="t">91&#176;</tspan></text><circle class="hit" cx="1148" cy="930" r="24"/><circle class="d" cx="1148" cy="930" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="Houston, official high 90 degrees" data-city="Houston" data-station="Hobby Airport" data-high="90" style="--d:0.552"><text class="city" x="1242" y="1098">Houston <tspan class="t">90&#176;</tspan></text><circle class="hit" cx="1224" cy="1089" r="24"/><circle class="d" cx="1224" cy="1089" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="Minneapolis, official high 90 degrees" data-city="Minneapolis" data-station="Minneapolis-St. Paul Airport" data-high="90" style="--d:0.580"><text class="city" x="1295" y="350">Minneapolis <tspan class="t">90&#176;</tspan></text><circle class="hit" cx="1278" cy="341" r="24"/><circle class="d" cx="1278" cy="341" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="New Orleans, official high 87 degrees" data-city="New Orleans" data-station="New Orleans Airport" data-high="87" style="--d:0.665"><text class="city" x="1456" y="1070">New Orleans <tspan class="t">87&#176;</tspan></text><circle class="hit" cx="1438" cy="1060" r="24"/><circle class="d" cx="1438" cy="1060" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="Chicago, official high 78 degrees" data-city="Chicago" data-station="Midway Airport" data-high="78" style="--d:0.689"><text class="city" x="1501" y="486">Chicago <tspan class="t">78&#176;</tspan></text><circle class="hit" cx="1484" cy="477" r="24"/><circle class="d" cx="1484" cy="477" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="Louisville, official high 67 degrees" data-city="Louisville" data-station="Louisville Airport" data-high="67" style="--d:0.739"><text class="city" x="1596" y="652">Louisville <tspan class="t">67&#176;</tspan></text><circle class="hit" cx="1579" cy="643" r="24"/><circle class="d" cx="1579" cy="643" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="Atlanta, official high 70 degrees" data-city="Atlanta" data-station="Hartsfield-Jackson Airport" data-high="70" style="--d:0.782"><text class="city" x="1677" y="866">Atlanta <tspan class="t">70&#176;</tspan></text><circle class="hit" cx="1660" cy="856" r="24"/><circle class="d" cx="1660" cy="856" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="Miami, official high 90 degrees" data-city="Miami" data-station="Miami International Airport" data-high="90" style="--d:0.907"><text class="city" x="1914" y="1218">Miami <tspan class="t">90&#176;</tspan></text><circle class="hit" cx="1897" cy="1209" r="24"/><circle class="d" cx="1897" cy="1209" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="Washington, official high 67 degrees" data-city="Washington" data-station="Reagan National Airport" data-high="67" style="--d:0.909"><line class="call" x1="1900" y1="553" x2="2140" y2="577"/><text class="city" x="2150" y="586">Washington <tspan class="t">67&#176;</tspan></text><circle class="hit" cx="1900" cy="553" r="24"/><circle class="d" cx="1900" cy="553" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="Philadelphia, official high 65 degrees" data-city="Philadelphia" data-station="Philadelphia International Airport" data-high="65" style="--d:0.938"><line class="call" x1="1955" y1="489" x2="2140" y2="534"/><text class="city" x="2150" y="543">Philadelphia <tspan class="t">65&#176;</tspan></text><circle class="hit" cx="1955" cy="489" r="24"/><circle class="d" cx="1955" cy="489" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="Trenton, official high 61 degrees" data-city="Trenton" data-station="Trenton-Mercer Airport" data-high="61" style="--d:0.943"><line class="call" x1="1965" y1="466" x2="2140" y2="491"/><text class="city" x="2150" y="500">Trenton <tspan class="t">61&#176;</tspan></text><circle class="hit" cx="1965" cy="466" r="24"/><circle class="d" cx="1965" cy="466" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="Newark, official high 62 degrees" data-city="Newark" data-station="Newark Liberty Airport" data-high="62" style="--d:0.953"><line class="call" x1="1984" y1="441" x2="2140" y2="448"/><text class="city" x="2150" y="457">Newark <tspan class="t">62&#176;</tspan></text><circle class="hit" cx="1984" cy="441" r="24"/><circle class="d" cx="1984" cy="441" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="New York, official high 60 degrees" data-city="New York" data-station="Central Park" data-high="60" style="--d:0.956"><line class="call" x1="1990" y1="435" x2="2140" y2="405"/><text class="city" x="2150" y="414">New York <tspan class="t">60&#176;</tspan></text><circle class="hit" cx="1990" cy="435" r="24"/><circle class="d" cx="1990" cy="435" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="Boston, official high 60 degrees" data-city="Boston" data-station="Logan Airport" data-high="60" style="--d:1.000"><text class="city" x="2090" y="340">Boston <tspan class="t">60&#176;</tspan></text><circle class="hit" cx="2073" cy="331" r="24"/><circle class="d" cx="2073" cy="331" r="8.5"/></g></g></svg>
+        <div class="tip" id="tip" role="status" aria-live="polite"></div>
       </div>
       <figcaption>
         <div class="legend" aria-hidden="true"><span style="background:#4b5fa6"></span><span style="background:#5576b8"></span><span style="background:#5f8fc6"></span><span style="background:#6aa9cf"></span><span style="background:#77c0ca"></span><span style="background:#8ccfb4"></span><span style="background:#a9d99c"></span><span style="background:#cadf8b"></span><span style="background:#e6dc80"></span><span style="background:#f2c96f"></span><span style="background:#f4ae5f"></span><span style="background:#ee9152"></span><span style="background:#e2724a"></span><span style="background:#cf5445"></span><span style="background:#b53e45"></span><span style="background:#932f48"></span><b style="grid-column:2">40&#176;</b><b style="grid-column:6">60&#176;</b><b style="grid-column:10">80&#176;</b><b style="grid-column:14">100&#176;</b></div>
         <p id="map-cap">The day&rsquo;s high across the lower 48 on Sunday, October 11, 2026, from NOAA&rsquo;s 3 km HRRR model, with
-          the official National Weather Service high at each airport Isotherm trades. Lines are isotherms, 10&nbsp;&deg;F apart.</p>
+          the official National Weather Service high in each city Isotherm trades. Lines are isotherms, 10&nbsp;&deg;F apart.
+          Hover a city for its reading.</p>
       </figcaption>
     </figure>
 
+    <section class="block" id="how" aria-labelledby="how-h">
+      <div class="head" data-reveal>
+        <h2 id="how-h">How it works</h2>
+        <p>Follow one market, Chicago&rsquo;s high for tomorrow, through the five stages Isotherm runs every day on one small
+          cloud server. The numbers are an example; the steps and the math are the real ones. Click a stage, or let it play.</p>
+      </div>
+
+      <div class="pipe" data-reveal>
+        <ol class="nodes" role="tablist" aria-label="Stages">
+          <li><button class="node" role="tab" id="tab-0" aria-controls="panel-0" aria-selected="true" data-step="0">
+            <span class="n">1</span><span class="t">Free data</span><span class="s">NOAA, ECMWF, airport sensors</span><span class="bar"></span></button></li>
+          <li><button class="node" role="tab" id="tab-1" aria-controls="panel-1" aria-selected="false" data-step="1" tabindex="-1">
+            <span class="n">2</span><span class="t">Forecast</span><span class="s">A chance for every degree</span><span class="bar"></span></button></li>
+          <li><button class="node" role="tab" id="tab-2" aria-controls="panel-2" aria-selected="false" data-step="2" tabindex="-1">
+            <span class="n">3</span><span class="t">Blend</span><span class="s">Market and forecast, weighted</span><span class="bar"></span></button></li>
+          <li><button class="node" role="tab" id="tab-3" aria-controls="panel-3" aria-selected="false" data-step="3" tabindex="-1">
+            <span class="n">4</span><span class="t">Trade</span><span class="s">Edge, limits, order</span><span class="bar"></span></button></li>
+          <li><button class="node" role="tab" id="tab-4" aria-controls="panel-4" aria-selected="false" data-step="4" tabindex="-1">
+            <span class="n">5</span><span class="t">Settle</span><span class="s">Official report, $1 or nothing</span><span class="bar"></span></button></li>
+        </ol>
+        <div class="loop" aria-hidden="true"><span>Every settled day becomes training data</span></div>
+      </div>
+
+      <div class="stage" data-reveal>
+        <div class="panels">
+        <div class="panel" id="panel-0" role="tabpanel" aria-labelledby="tab-0">
+          <div class="copy">
+            <h3>Free data, lined up in time</h3>
+            <p>Isotherm reads NOAA&rsquo;s model guidance and its 3&nbsp;km HRRR model, ECMWF&rsquo;s open data, live airport
+              sensors and the official climate reports. All of it is free.</p>
+            <p>Each model run comes out minutes to hours after it starts. An input only counts once it was really public, so
+              the model never trains on anything it couldn&rsquo;t have seen live.</p>
+            <p class="hint">Drag the clock to see which parts of the 8 AM model runs are out yet.</p>
+          </div>
+          <div class="viz">
+            <div class="feed-wrap"><div class="feed" id="feed"></div></div>
+            <label class="slider"><span>Time since the 8:00 AM ET runs started</span><output id="now-out">8:00 AM</output>
+              <input type="range" id="now-in" min="0" max="480" step="5" value="0" aria-label="Time since the model runs started, in minutes"></label>
+          </div>
+        </div>
+
+        <div class="panel" id="panel-1" role="tabpanel" aria-labelledby="tab-1" hidden>
+          <div class="copy">
+            <h3>A forecast of the exact number</h3>
+            <p>A LightGBM model gives a chance for every whole degree the official report could show. It works from offsets
+              to the latest NOAA blend, so one model serves all 24 cities.</p>
+            <p>It sharpens through the day, and once the day starts it knows the high can&rsquo;t fall below what the sensors
+              already saw. The night before, it misses by <span class="kv">1.57&nbsp;&deg;F</span> on average, against
+              <span class="kv">1.92&nbsp;&deg;F</span> for the best single NOAA product.</p>
+          </div>
+          <div class="viz">
+            <div class="seg" role="group" aria-label="Forecast time">
+              <button type="button" data-preset="night" aria-pressed="true">11 PM, night before</button>
+              <button type="button" data-preset="am" aria-pressed="false">8 AM</button>
+              <button type="button" data-preset="pm" aria-pressed="false">2 PM, high so far 83&deg;</button>
+            </div>
+            <div class="chart" id="fchart"><div class="passed" id="passed"><span>Already passed</span></div></div>
+            <div class="xl" id="fx"></div>
+            <p class="vcap">Chance the official high lands on each whole degree, &deg;F</p>
+          </div>
+        </div>
+
+        <div class="panel" id="panel-2" role="tabpanel" aria-labelledby="tab-2" hidden>
+          <div class="copy">
+            <h3>Blended with the market</h3>
+            <p>The market is sharper than any single forecast, so Isotherm pools the two instead of picking one. Each 2&nbsp;&deg;F
+              bracket&rsquo;s blended chance is the market&rsquo;s price and the forecast, each raised to a weight.</p>
+            <p>The weights are refit every week on the last 90 days, one set per decision time. Move them to see how the
+              blend shifts, and how little the forecast needs to move it.</p>
+          </div>
+          <div class="viz">
+            <div class="legend2"><span><i style="background: var(--mkt)"></i>Market price</span><span><i style="background: var(--cool)"></i>Forecast</span><span><i style="background: var(--ink)"></i>Blend</span></div>
+            <div class="groups" id="groups"></div>
+            <div class="xl6" id="gx"></div>
+            <div class="formula" id="formula"></div>
+            <label class="slider"><span>Weight on the market</span><output id="a-out">1.00</output>
+              <input type="range" id="a-in" min="0" max="1.5" step="0.05" value="1"></label>
+            <label class="slider"><span>Weight on the forecast</span><output id="b-out">0.45</output>
+              <input type="range" id="b-in" min="0" max="1" step="0.05" value="0.45"></label>
+          </div>
+        </div>
+
+        <div class="panel" id="panel-3" role="tabpanel" aria-labelledby="tab-3" hidden>
+          <div class="copy">
+            <h3>Trades inside hard limits</h3>
+            <p>Isotherm buys only where the blended chance beats the price by Kalshi&rsquo;s fee plus a safety margin. Most of
+              the time nothing clears it, and it waits.</p>
+            <p>Every order then has to fit caps on the bracket, the city, the whole account and the group of nearby cities
+              whose weather moves together. It goes out immediate-or-cancel, and resting orders expire within minutes if the
+              server goes quiet.</p>
+            <p class="hint">This table follows the weights you set in Blend. The margin here is 5&cent;.</p>
+          </div>
+          <div class="viz">
+            <table class="ttable" id="ttable">
+              <thead><tr><th>Bracket</th><th>Price</th><th>Blend</th><th>Edge after fee</th><th>Action</th></tr></thead>
+              <tbody></tbody>
+            </table>
+            <div id="tout"></div>
+          </div>
+        </div>
+
+        <div class="panel" id="panel-4" role="tabpanel" aria-labelledby="tab-4" hidden>
+          <div class="copy">
+            <h3>Settled by the official report</h3>
+            <p>The next morning the National Weather Service publishes the day&rsquo;s high. The bracket that holds it pays
+              $1 a contract and the rest pay nothing.</p>
+            <p>Every settled day goes back into the training data, and a dashboard on the phone shows the result within a
+              minute.</p>
+          </div>
+          <div class="viz">
+            <div class="report"><span class="big" id="hi">84&deg;F</span><span class="lbl">Official high, Chicago Midway<br>National Weather Service daily climate report</span></div>
+            <div class="payrow" id="payrow"></div>
+            <p class="pnl" id="pnl"></p>
+            <div class="back"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v4h-4"/></svg>Added to the training set for the next weekly refit</div>
+          </div>
+        </div>
+
+        </div>
+        <div class="ctrl">
+          <span id="step-lbl">Stage 1 of 5</span>
+          <div class="btns">
+            <button type="button" class="ibtn" id="prev" aria-label="Previous stage">Back</button>
+            <button type="button" class="ibtn" id="play" aria-pressed="true">Pause</button>
+            <button type="button" class="ibtn" id="next" aria-label="Next stage">Next</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <section class="block" id="day" aria-labelledby="day-h">
-      <div class="head">
+      <div class="head" data-reveal>
         <h2 id="day-h">A day in the market</h2>
-        <p>Every airport gets a new market each day, split into 2&nbsp;&deg;F brackets. Isotherm re-forecasts at set times, keeps
+        <p>Every city gets a new market each day, split into 2&nbsp;&deg;F brackets. Isotherm re-forecasts at set times, keeps
           its quotes fresh in between, and holds every position until the official report settles it. Times are Eastern.</p>
       </div>
-      <ol class="day">
-        <li><time>10 AM</time><p>The day before, Kalshi lists the brackets for tomorrow&rsquo;s high.</p></li>
-        <li><time>11 AM, 2 PM</time><p>Early bets, where the forecast&rsquo;s edge over the market is largest.</p></li>
-        <li><time>5 PM, 11 PM</time><p>Night-before forecasts from the evening model runs.</p></li>
-        <li><time>5 AM to 5 PM</time><p>On the day, forecasts refresh every three hours and live sensor readings rule out
-          brackets the high has passed.</p></li>
-        <li><time>11:59 PM</time><p>Trading closes.</p></li>
-        <li class="settle"><time>7 AM</time><p>The next morning, markets settle on the National Weather Service&rsquo;s daily
-          climate report, East Coast first.</p></li>
+      <ol class="day" data-reveal>
+        <li style="--i: 0"><time>10 AM</time><p>The day before, Kalshi lists the brackets for tomorrow&rsquo;s high.</p></li>
+        <li style="--i: 1"><time>11 AM, 2 PM</time><p>Early bets, where the forecast&rsquo;s edge over the market is largest.</p></li>
+        <li style="--i: 2"><time>5 PM, 11 PM</time><p>Night-before forecasts from the evening model runs.</p></li>
+        <li style="--i: 3"><time>5 AM to 5 PM</time><p>On the day, forecasts refresh every three hours and live sensor readings
+          rule out brackets the high has passed.</p></li>
+        <li style="--i: 4"><time>11:59 PM</time><p>Trading closes.</p></li>
+        <li style="--i: 5" class="settle"><time>7 AM</time><p>The next morning, markets settle on the National Weather
+          Service&rsquo;s daily climate report, East Coast first.</p></li>
       </ol>
     </section>
 
     <section class="block" id="dashboard" aria-labelledby="dash-h">
-      <div class="head">
+      <div class="head" data-reveal>
         <h2 id="dash-h">A live dashboard, on any phone</h2>
         <p>A private dashboard shows the account, the money at risk against every limit, profit by day, and which cities
           and bet types are working. The trading server publishes encrypted numbers every minute and the page decrypts them on
           the device, so it stays live without a laptop running anywhere.</p>
       </div>
-      <figure class="shots">
-        <img class="desk" src="assets/dashboard-desktop.webp" width="2560" height="1800"
+      <figure class="shots" data-reveal>
+        <img class="desk" src="assets/dashboard-desktop.webp" width="2560" height="1800" loading="lazy"
           alt="Isotherm dashboard on a desktop: bot health, account value, today's result, and capital in use against each limit, shown with made-up sample data.">
-        <img class="phone" src="assets/dashboard-phone.webp" width="1170" height="2532"
+        <img class="phone" id="phone" src="assets/dashboard-phone.webp" width="1170" height="2532" loading="lazy"
           alt="Isotherm dashboard on a phone: the daily profit chart and seven-day summary, shown with made-up sample data.">
       </figure>
       <p class="shots-cap">Shown with made-up sample data. The live dashboard is private.</p>
     </section>
 
-    <section class="block" id="how" aria-labelledby="how-h">
-      <div class="head">
-        <h2 id="how-h">How it works</h2>
-        <p>Four stages run on one small cloud server, every day, on their own.</p>
-      </div>
-      <ol class="steps">
-        <li><div><h3>Free data, lined up in time</h3>
-          <p>NOAA&rsquo;s National Blend of Models, model output statistics and the 3&nbsp;km HRRR, ECMWF&rsquo;s open data, live
-            airport sensors, and the official daily climate reports. Every input is matched to the minute it became public,
-            so training never sees anything the live system couldn&rsquo;t have.</p></div></li>
-        <li><div><h3>A forecast of the exact number</h3>
-          <p>A LightGBM model predicts a probability for every whole degree the official report could show. The night before,
-            it misses by <span class="figure">1.57&nbsp;&deg;F</span> on average against <span class="figure">1.92&nbsp;&deg;F</span>
-            for the best single NOAA product, and it beats that product at all 24 airports.</p></div></li>
-        <li><div><h3>Blended with the market</h3>
-          <p>The market is sharper than any single forecast, so Isotherm doesn&rsquo;t try to replace it. It pools market prices
-            with its own forecast using weights refit every week, and leans against the market when traders anchor on the
-            government&rsquo;s headline number.</p></div></li>
-        <li><div><h3>Trades inside hard limits</h3>
-          <p>Orders go in only where the price sits past the blend by the fee plus a margin. There are caps on every bracket,
-            city and the whole account, daily and drawdown stops, one shared budget for cities whose weather moves together,
-            and orders that expire within minutes if the server goes quiet.</p></div></li>
-      </ol>
-    </section>
-
-    <section class="block" aria-labelledby="test-h">
-      <div class="head">
+    <section class="block" id="tested" aria-labelledby="test-h">
+      <div class="head" data-reveal>
         <h2 id="test-h">Tested before it touched money</h2>
         <p>Model changes had to beat the version before them on rules written down before the test, and the trading code
           ran on Kalshi&rsquo;s demo exchange before a real dollar went in.</p>
       </div>
-      <ul class="checks">
+      <div class="stats" data-stagger>
+        <div><b data-count="622">622</b><span class="lbl">automated tests</span></div>
+        <div><b data-count="40000">40,000</b><span class="lbl">chaos-test cycles with API failures injected</span></div>
+        <div><b><span data-count="1.57" data-dec="2">1.57</span>&nbsp;&deg;F</b><span class="lbl">average miss the night before</span></div>
+        <div><b data-count="24">24</b><span class="lbl">cities, re-forecast six times a day</span></div>
+      </div>
+      <ul class="checks" data-stagger>
         <li><strong>Walk-forward tests.</strong> Every model is scored only on days after the ones it learned from.</li>
         <li><strong>A blind holdout.</strong> October and November are set aside and scored once, on December 1, by frozen scripts.</li>
         <li><strong>A leakage audit.</strong> Inputs rebuilt from data cut off at each decision time came out identical.</li>
         <li><strong>Market replays.</strong> The real trading code, run on recorded order books with pessimistic fill rules.</li>
         <li><strong>A rival bot.</strong> On Kalshi&rsquo;s demo exchange, a second account traded against Isotherm on purpose.</li>
-        <li><strong>622 automated tests,</strong> including a 40,000-cycle chaos test with injected API failures.</li>
+        <li><strong>Staged rollout.</strong> Real money went in at a fraction of full size, with each stage gated on clean days.</li>
       </ul>
     </section>
 
     <section class="block" aria-labelledby="stack-h">
-      <h2 id="stack-h">Built with</h2>
-      <ul class="stack">
+      <h2 id="stack-h" data-reveal>Built with</h2>
+      <ul class="stack" data-stagger>
         <li>Python</li><li>LightGBM</li><li>NumPy and pandas</li><li>SciPy</li><li>SQLite</li><li>eccodes (GRIB2)</li>
         <li>Kalshi REST and WebSocket APIs</li><li>AWS EC2</li><li>systemd</li><li>Web Crypto</li><li>GitHub Pages</li>
       </ul>
@@ -278,14 +617,338 @@ footer .who { text-align: right; }
   </main>
 
   <footer>
-    <div>
-      <p>Not affiliated with Kalshi.</p>
-    </div>
+    <p>Not affiliated with Kalshi.</p>
     <div class="who">
       <p>Built by Shourya Mehta</p>
       <p><a href="https://github.com/shourya0mehta/isotherm">Code on GitHub</a></p>
     </div>
   </footer>
 </div>
+
+<script>
+(() => {
+  "use strict";
+  const root = document.documentElement;
+  root.classList.add("js");
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+  const raf = (f) => requestAnimationFrame(f);
+  const tween = (dur, fn, done) => {
+    if (reduce) { fn(1); if (done) done(); return () => {}; }
+    let stop = false; const t0 = performance.now();
+    const step = (now) => { if (stop) return; const t = Math.max(0, Math.min(1, (now - t0) / dur)); fn(t); if (t < 1) raf(step); else if (done) done(); };
+    raf(step); return () => { stop = true; };
+  };
+  const easeOut = (t) => 1 - Math.pow(1 - t, 3);
+
+  /* top bar + progress + active section */
+  const bar = $("#topbar"), prog = $("#progress");
+  const onScroll = () => {
+    const y = scrollY, h = root.scrollHeight - innerHeight;
+    bar.classList.toggle("scrolled", y > 8);
+    prog.style.transform = "scaleX(" + (h > 0 ? Math.min(1, y / h) : 0) + ")";
+    parallax();
+  };
+  const links = $$('.nav a[href^="#"]');
+  const secObs = new IntersectionObserver((es) => es.forEach((e) => {
+    if (e.isIntersecting) links.forEach((a) => a.classList.toggle("on", a.getAttribute("href") === "#" + e.target.id));
+  }), { rootMargin: "-45% 0px -50% 0px" });
+  $$("main section[id]").forEach((s) => secObs.observe(s));
+
+  /* headline words */
+  const h1 = $("#hero-h");
+  if (h1 && !reduce) {
+    const words = h1.textContent.trim().split(/\s+/);
+    h1.setAttribute("aria-label", h1.textContent.trim());
+    h1.innerHTML = words.map((w, i) => '<span class="w" aria-hidden="true"><span style="--i:' + i + '">' + w + "</span></span>").join(" ");
+    raf(() => raf(() => h1.classList.add("go")));
+  }
+
+  /* next forecast refresh (decision times are fixed in UTC) */
+  const nx = $("#next-run");
+  const RUNS = [3, 9, 12, 15, 18, 21];
+  const tf = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", hour: "numeric", minute: "2-digit" });
+  const nextRun = () => {
+    const n = new Date();
+    for (let d = 0; d < 2; d++) for (const h of RUNS) {
+      const t = new Date(Date.UTC(n.getUTCFullYear(), n.getUTCMonth(), n.getUTCDate() + d, h, 0));
+      if (t > n) return t;
+    }
+  };
+  const tickRun = () => {
+    const t = nextRun(); const m = Math.max(1, Math.round((t - Date.now()) / 60000));
+    const hh = Math.floor(m / 60), mm = m % 60;
+    nx.textContent = "Next forecast refresh at " + tf.format(t) + " ET, in " + (hh ? hh + " h " : "") + mm + " min";
+  };
+  if (nx) { tickRun(); setInterval(tickRun, 30000); }
+
+  /* count-ups */
+  $$("[data-count]").forEach((el) => {
+    const end = +el.dataset.count, dec = +(el.dataset.dec || 0);
+    const f = (v) => v.toLocaleString("en-US", { minimumFractionDigits: dec, maximumFractionDigits: dec });
+    if (reduce) { el.textContent = f(end); return; }
+    el.textContent = f(0);
+    el.closest("[data-reveal], [data-stagger] > *").addEventListener("reveal", () => {
+      tween(1500, (t) => { el.textContent = f(end * (1 - Math.pow(1 - t, 4))); });
+    }, { once: true });
+  });
+
+  /* map: west-to-east sweep, cities pop in, tooltips */
+  const sweep = $("#sweep-rect"), map = $("figure.map");
+  if (sweep && map) {
+    const W = +sweep.getAttribute("width");
+    if (!reduce) sweep.setAttribute("width", "0");
+    map.addEventListener("reveal", () => {
+      tween(1700, (t) => sweep.setAttribute("width", String(W * easeOut(t))));
+    }, { once: true });
+  }
+  const tip = $("#tip"), box = $(".map-scroll");
+  $$(".map .ap").forEach((g) => {
+    const show = () => {
+      const c = g.querySelector("circle.d").getBoundingClientRect(), b = box.getBoundingClientRect();
+      tip.innerHTML = "<b>" + g.dataset.city + "</b><span>" + g.dataset.station + "</span><span>Official high " + g.dataset.high + "&deg;F</span>";
+      tip.style.left = (c.left + c.width / 2 - b.left) + "px";
+      tip.style.top = (c.top - b.top) + "px";
+      tip.classList.add("on"); g.classList.add("hot");
+    };
+    const hide = () => { tip.classList.remove("on"); g.classList.remove("hot"); };
+    g.addEventListener("pointerenter", show); g.addEventListener("pointerleave", hide);
+    g.addEventListener("focus", show); g.addEventListener("blur", hide);
+    g.addEventListener("click", show);
+  });
+
+  /* dashboard phone drifts slightly as you scroll */
+  const phone = $("#phone");
+  function parallax() {
+    if (!phone || reduce || innerWidth < 560) return;
+    const r = phone.getBoundingClientRect(); const off = (r.top + r.height / 2 - innerHeight / 2) * -0.06;
+    phone.style.transform = "translateY(" + off.toFixed(1) + "px)";
+  }
+
+  /* ------------------------------------------------------------ how it works */
+  const BR = ["79° or below", "80–81°", "82–83°", "84–85°", "86–87°", "88° or above"];
+  const BRS = ["≤79", "80–81", "82–83", "84–85", "86–87", "≥88"];
+  const MARKET = [5, 14, 33, 27, 15, 6];           // example prices, cents (mid)
+  const DEG = [78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90];
+  const PMF = {
+    night: { 78: 1, 79: 2, 80: 3, 81: 5, 82: 9, 83: 13, 84: 24, 85: 22, 86: 11, 87: 6, 88: 3, 89: 1 },
+    am: { 79: 1, 80: 2, 81: 3, 82: 7, 83: 12, 84: 27, 85: 25, 86: 13, 87: 6, 88: 3, 89: 1 },
+    pm: { 82: 1, 83: 10, 84: 36, 85: 31, 86: 14, 87: 6, 88: 2 }
+  };
+  const bracketOf = (k) => (k <= 79 ? 0 : k >= 88 ? 5 : Math.floor((k - 80) / 2) + 1);
+  const FB = [0, 0, 0, 0, 0, 0];
+  Object.entries(PMF.night).forEach(([k, v]) => { FB[bracketOf(+k)] += v; });
+  const MARGIN = 5, OFFICIAL = 84, SIZE = 5;
+  const fee = (p) => Math.ceil(7 * p * (100 - p) / 10000 - 1e-9);   // cents per contract at price p (cents)
+  const S = { step: 0, a: 1, b: 0.45, preset: "night", now: 0, playing: !reduce, touched: false };
+  const stops = [];
+  const clearStops = () => { while (stops.length) stops.pop()(); };
+
+  const pool = () => {
+    const s = MARKET.map((m, i) => S.a * Math.log(m) + S.b * Math.log(FB[i]));
+    const mx = Math.max(...s); const e = s.map((x) => Math.exp(x - mx)); const z = e.reduce((p, q) => p + q, 0);
+    return e.map((x) => 100 * x / z);
+  };
+  const signals = () => {
+    const p = pool();
+    return MARKET.map((m, i) => {
+      const ask = m + 1, bid = m - 1;
+      const yes = p[i] - ask - fee(ask), no = bid - p[i] - fee(100 - bid);
+      const side = yes >= no ? "YES" : "NO", edge = Math.max(yes, no);
+      return { i, ask, bid, fair: p[i], side, edge, buy: edge >= MARGIN, price: side === "YES" ? ask : 100 - bid };
+    });
+  };
+
+  /* stage 1: data timing */
+  const FEED = [["Airport sensors", 5, true], ["LAMP hourly update", 40], ["National Blend of Models", 75], ["HRRR 3 km model", 180],
+    ["NAM model statistics", 210], ["GFS model statistics", 240], ["ECMWF European model", 455]];
+  const SPAN = 480;
+  const feed = $("#feed");
+  feed.innerHTML = FEED.map(([n, lag]) =>
+    '<div class="frow"><span class="src">' + n + '</span><div class="ftrack"><div class="span" style="width:' + (lag / SPAN * 100) +
+    '%"></div><div class="fill"></div></div><span class="st"></span></div>').join("") +
+    '<div class="nowline" id="nowline"><b></b></div>';
+  const clockAt = (min) => { const t = 8 * 60 + min; const h = Math.floor(t / 60), m = t % 60; return ((h - 1) % 12 + 1) + ":" + String(m).padStart(2, "0") + (h >= 12 ? " PM" : " AM"); };
+  const nowIn = $("#now-in"), nowOut = $("#now-out"), nowline = $("#nowline");
+  const drawFeed = () => {
+    const rows = $$(".frow", feed);
+    FEED.forEach(([, lag, live], i) => {
+      const r = rows[i], ok = live || S.now >= lag;
+      r.classList.toggle("ok", ok);
+      r.querySelector(".fill").style.width = (Math.min(S.now, lag) / SPAN * 100) + "%";
+      let k = 0; while (S.now + 360 * k < lag) k++;
+      r.querySelector(".st").textContent = live ? "Live, every 5 min" : ok ? "Public" : "Using the " + ["8 AM", "2 AM", "8 PM"][k] + " run";
+    });
+    const tr = rows[0].querySelector(".ftrack"), fr = feed.getBoundingClientRect(), trr = tr.getBoundingClientRect();
+    nowline.style.left = (trr.left - fr.left + trr.width * S.now / SPAN) + "px";
+    nowline.querySelector("b").textContent = clockAt(S.now);
+    nowOut.textContent = clockAt(S.now) + " ET";
+    nowIn.value = S.now;
+  };
+  nowIn.addEventListener("input", () => { touch(); S.now = +nowIn.value; drawFeed(); });
+
+  /* stage 2: forecast */
+  const fchart = $("#fchart"), passed = $("#passed");
+  fchart.insertAdjacentHTML("beforeend", DEG.map(() => '<div class="col"><div class="b"></div><div class="pct"></div></div>').join(""));
+  $("#fx").innerHTML = DEG.map((d) => "<span>" + d + "</span>").join("");
+  const drawForecast = () => {
+    const pm = PMF[S.preset], mx = 40; let top = -1, tv = -1;
+    DEG.forEach((d) => { if ((pm[d] || 0) > tv) { tv = pm[d] || 0; top = d; } });
+    $$(".col", fchart).forEach((c, i) => {
+      const v = pm[DEG[i]] || 0, h = Math.min(100, v / mx * 100);
+      const b = c.querySelector(".b"), t = c.querySelector(".pct");
+      b.style.height = h + "%"; b.classList.toggle("top", DEG[i] === top);
+      t.textContent = v >= 3 ? v + "%" : ""; t.style.bottom = "calc(" + h + "% + 4px)";
+    });
+    const cols = $$(".col", fchart);
+    if (S.preset === "pm") {
+      const r0 = fchart.getBoundingClientRect(), r83 = cols[DEG.indexOf(83)].getBoundingClientRect();
+      passed.style.width = (r83.left - r0.left - 3) + "px"; passed.style.opacity = 1;
+    } else { passed.style.width = "0px"; passed.style.opacity = 0; }
+    $$(".seg button").forEach((x) => x.setAttribute("aria-pressed", String(x.dataset.preset === S.preset)));
+  };
+  $$(".seg button").forEach((x) => x.addEventListener("click", () => { touch(); S.preset = x.dataset.preset; drawForecast(); }));
+
+  /* stage 3: blend */
+  const groups = $("#groups");
+  groups.innerHTML = MARKET.map(() => '<div class="grp"><div class="b m"></div><div class="b f"></div><div class="b p"></div><div class="v"></div></div>').join("");
+  $("#gx").innerHTML = BRS.map((b) => "<span>" + b + "</span>").join("");
+  const aIn = $("#a-in"), bIn = $("#b-in");
+  const drawBlend = () => {
+    const p = pool(), mx = 60;
+    $$(".grp", groups).forEach((g, i) => {
+      g.querySelector(".m").style.height = (MARKET[i] / mx * 100) + "%";
+      g.querySelector(".f").style.height = (FB[i] / mx * 100) + "%";
+      const hp = Math.min(100, p[i] / mx * 100);
+      g.querySelector(".p").style.height = hp + "%";
+      const v = g.querySelector(".v"); v.textContent = Math.round(p[i]) + "%"; v.style.bottom = "calc(" + hp + "% + 3px)";
+    });
+    $("#a-out").textContent = S.a.toFixed(2); $("#b-out").textContent = S.b.toFixed(2);
+    aIn.value = S.a; bIn.value = S.b;
+    $("#formula").innerHTML = "blend &prop; market<sup>" + S.a.toFixed(2) + "</sup> &times; forecast<sup>" + S.b.toFixed(2) +
+      "</sup><small>The live version also adds a tilt and a curvature term, and a shift for how far NOAA&rsquo;s headline number sits from the market.</small>";
+  };
+  aIn.addEventListener("input", () => { touch(); S.a = +aIn.value; drawBlend(); drawTrade(false); drawSettle(false); });
+  bIn.addEventListener("input", () => { touch(); S.b = +bIn.value; drawBlend(); drawTrade(false); drawSettle(false); });
+
+  /* stage 4: trade */
+  const tbody = $("#ttable tbody"), tout = $("#tout");
+  const drawTrade = (animate) => {
+    const sg = signals();
+    tbody.innerHTML = sg.map((s) =>
+      '<tr class="' + (s.buy ? "sig" : "") + '"><td>' + BR[s.i] + '</td><td class="num">' + MARKET[s.i] + '&cent;</td><td class="num">' +
+      s.fair.toFixed(1) + '%</td><td class="num">' + (s.edge >= 0 ? "+" : "") + s.edge.toFixed(1) + '&cent;</td><td>' +
+      (s.buy ? '<span class="pill buy">Buy ' + s.side + "</span>" : '<span class="pill">Wait</span>') + "</td></tr>").join("");
+    const buys = sg.filter((s) => s.buy);
+    if (!buys.length) {
+      tout.innerHTML = '<p class="wait">No bracket clears the fee plus the margin, so Isotherm waits. Raise the weight on the forecast in Blend to see a trade appear.</p>';
+      return;
+    }
+    const o = buys[0];
+    tout.innerHTML = '<ul class="checks2">' + ["Inside the bracket limit", "Inside the city limit", "Inside the account limit",
+      "Inside the nearby-cities budget"].map((t) => '<li><span class="ck">&#10003;</span>' + t + "</li>").join("") +
+      '<li class="send"><span class="ck">&#8599;</span>Sent: buy ' + SIZE + " " + o.side + " on " + BR[o.i] + " at " + o.price +
+      "&cent;, immediate-or-cancel" + (buys.length > 1 ? " (+" + (buys.length - 1) + " more)" : "") + "</li></ul>";
+    const items = $$(".checks2 li", tout);
+    if (!animate || reduce) { items.forEach((li) => li.classList.add("on")); return; }
+    items.forEach((li, k) => { const id = setTimeout(() => li.classList.add("on"), 350 + k * 380); stops.push(() => clearTimeout(id)); });
+  };
+
+  /* stage 5: settle */
+  const payrow = $("#payrow"), pnl = $("#pnl");
+  const win = bracketOf(OFFICIAL);
+  const drawSettle = (animate) => {
+    payrow.innerHTML = BRS.map((b, i) => '<div class="' + (i === win && !animate ? "win" : "") + '"><b>' + b + "</b>" +
+      (i === win ? "Pays $1" : "Pays $0") + "</div>").join("");
+    const buys = signals().filter((s) => s.buy);
+    if (!buys.length) { pnl.textContent = "No position this time, so nothing to settle. The day still joins the training data."; }
+    else {
+      let tot = 0; const parts = buys.map((s) => {
+        const won = (s.side === "YES") === (s.i === win); const per = (won ? 100 : 0) - s.price - fee(s.price); tot += per * SIZE;
+        return BR[s.i] + " " + s.side + " at " + s.price + "¢: " + (per >= 0 ? "+" : "−") + Math.abs(per) + "¢ a contract";
+      });
+      pnl.innerHTML = parts.join("; ") + ". On " + SIZE + " contracts: <b>" + (tot >= 0 ? "+" : "−") + "$" + (Math.abs(tot) / 100).toFixed(2) + "</b> after fees.";
+    }
+    if (animate && !reduce) {
+      const hi = $("#hi");
+      stops.push(tween(1200, (t) => { hi.innerHTML = Math.round(70 + (OFFICIAL - 70) * easeOut(t)) + "&deg;F"; }, () => {
+        const w = payrow.children[win]; if (w) w.classList.add("win");
+      }));
+    }
+  };
+
+  /* stage switching + autoplay */
+  const tabs = $$(".node"), panels = $$(".panel"), DUR = [7000, 7500, 8000, 7000, 6500];
+  let timer = 0;
+  const enter = {
+    0: () => { if (S.touched) { drawFeed(); return; } S.now = 0; drawFeed(); stops.push(tween(5200, (t) => { S.now = Math.round(SPAN * t / 5) * 5; drawFeed(); })); },
+    1: () => {
+      if (S.touched) { drawForecast(); return; }
+      S.preset = "night"; drawForecast();
+      ["am", "pm"].forEach((p, k) => { const id = setTimeout(() => { S.preset = p; drawForecast(); }, 2200 * (k + 1)); stops.push(() => clearTimeout(id)); });
+    },
+    2: () => {
+      if (S.touched) { drawBlend(); return; }
+      const b0 = S.b; S.b = 0; drawBlend();
+      stops.push(tween(2200, (t) => { S.b = Math.round(b0 * easeOut(t) * 100) / 100; drawBlend(); }, () => { S.b = b0; drawBlend(); }));
+    },
+    3: () => drawTrade(true),
+    4: () => drawSettle(true)
+  };
+  const go = (i, fromUser) => {
+    clearStops(); clearTimeout(timer);
+    S.step = (i + 5) % 5;
+    tabs.forEach((t, k) => {
+      const on = k === S.step; t.setAttribute("aria-selected", String(on)); t.tabIndex = on ? 0 : -1;
+      t.classList.remove("run"); t.style.removeProperty("--dur");
+    });
+    panels.forEach((p, k) => { p.hidden = k !== S.step; p.classList.remove("enter"); });
+    const p = panels[S.step]; void p.offsetWidth; p.classList.add("enter");
+    $("#step-lbl").textContent = "Stage " + (S.step + 1) + " of 5";
+    const ol = $(".nodes");
+    if (ol.scrollWidth > ol.clientWidth + 4) ol.scrollTo({ left: tabs[S.step].parentElement.offsetLeft - 8, behavior: reduce ? "auto" : "smooth" });
+    enter[S.step]();
+    if (S.playing && !fromUser) {
+      const t = tabs[S.step]; t.style.setProperty("--dur", DUR[S.step] + "ms"); void t.offsetWidth; t.classList.add("run");
+      timer = setTimeout(() => go(S.step + 1), DUR[S.step]);
+    }
+  };
+  const setPlaying = (on) => {
+    S.playing = on; const b = $("#play"); b.textContent = on ? "Pause" : "Play"; b.setAttribute("aria-pressed", String(on));
+    if (!on) { clearTimeout(timer); tabs.forEach((t) => t.classList.remove("run")); }
+  };
+  function touch() { S.touched = true; if (S.playing) setPlaying(false); }
+  tabs.forEach((t, k) => {
+    t.addEventListener("click", () => { touch(); go(k, true); });
+    t.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+        e.preventDefault(); touch(); const n = (k + (e.key === "ArrowRight" ? 1 : -1) + 5) % 5; go(n, true); tabs[n].focus();
+      }
+    });
+  });
+  $("#prev").addEventListener("click", () => { touch(); go(S.step - 1, true); });
+  $("#next").addEventListener("click", () => { touch(); go(S.step + 1, true); });
+  $("#play").addEventListener("click", () => { if (S.playing) setPlaying(false); else { S.touched = false; setPlaying(true); go(S.step + 1); } });
+
+  drawFeed(); drawForecast(); drawBlend(); drawTrade(false); drawSettle(false);
+  setPlaying(S.playing);
+  let started = false;
+  const stage = $(".stage");
+  new IntersectionObserver((es) => es.forEach((e) => {
+    if (e.isIntersecting && !started) { started = true; go(S.step, !S.playing); }
+    else if (!e.isIntersecting && S.playing) { clearTimeout(timer); tabs.forEach((t) => t.classList.remove("run")); started = false; }
+  }), { threshold: 0.35 }).observe(stage);
+  addEventListener("resize", () => { drawFeed(); drawForecast(); parallax(); });
+
+  /* reveal on scroll (registered last so every listener above is in place) */
+  $$("[data-stagger]").forEach((p) => Array.from(p.children).forEach((c, i) => { c.setAttribute("data-reveal", ""); c.style.setProperty("--i", i); }));
+  const rev = new IntersectionObserver((es) => es.forEach((e) => {
+    if (e.isIntersecting) { e.target.classList.add("is-in"); e.target.dispatchEvent(new CustomEvent("reveal")); rev.unobserve(e.target); }
+  }), { threshold: 0.12, rootMargin: "0px 0px -5% 0px" });
+  $$("[data-reveal]").forEach((el) => rev.observe(el));
+  addEventListener("scroll", onScroll, { passive: true }); onScroll();
+})();
+</script>
 </body>
 </html>
