@@ -44,7 +44,7 @@ quotes fresh in between, and holds every position until the official report sett
 | 7 AM, the next morning | Markets settle on the National Weather Service's daily climate report, East Coast first |
 
 This is a partial public copy of a private repository. The code, tests and core research scripts are here. Keys,
-live configs, trained models, market data and deployment scripts are not (see [What's not here](#whats-not-here)).
+live configs, trained models, market data and deployment scripts are not.
 The code lives in the `wxbot` Python package.
 
 ## How it works
@@ -163,22 +163,9 @@ Results go to `data/` (a SQLite store, a status file and an HTML dashboard). The
 the example config runs with the market-anchored fair value. `research/ml/train_final.py` trains a forecaster once
 you have pulled the history with `research/pullers/`. The HRRR pullers also need `numcodecs` and `pyproj`.
 
-## What's not here
-
-- API keys and anything that touches the server or the live account
-- The live and demo configs (caps, thresholds and city lists)
-- Trained models, fitted pool weights and the calibration map
-- Kalshi market data and anything derived from it, including the research results
-- Deployment scripts, the encrypted dashboard publisher and the project's working notes
-
 ## Built with
 
 Python, LightGBM, NumPy, pandas, SciPy, SQLite, eccodes (GRIB2), Kalshi REST and WebSocket APIs, AWS EC2, systemd,
 Web Crypto, GitHub Pages.
-
-## About the name
-
-An isotherm is the line on a weather map that joins places at the same temperature. Alexander von Humboldt drew the
-first one in 1817.
 
 Built by Shourya Mehta. Not affiliated with Kalshi. Shared for portfolio review; all rights reserved.
