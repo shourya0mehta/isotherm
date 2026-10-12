@@ -25,11 +25,7 @@ types are working. The trading server publishes encrypted numbers to GitHub ever
 derived from a passcode by PBKDF2), and the page decrypts them on the device, so it stays live on any phone without a
 laptop running anywhere.
 
-<p>
-  <img src="docs/assets/dashboard-desktop.webp" width="66%" alt="Isotherm dashboard on a desktop, shown with made-up sample data">
-  &nbsp;
-  <img src="docs/assets/dashboard-phone.webp" width="28%" alt="Isotherm dashboard on a phone, shown with made-up sample data">
-</p>
+![The Isotherm dashboard on a desktop and a phone, shown with made-up sample data](docs/assets/dashboard-combo.webp)
 
 <sub>Shown with made-up sample data. The live dashboard is private.</sub>
 
