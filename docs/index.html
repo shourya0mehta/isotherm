@@ -17,7 +17,8 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Public+Sans:wght@400;500;600&display=swap">
 <style>
 :root {
-  --paper: #fbfcfc;
+  --paper: #ffffff;
+  --panel: #fbfcfc;
   --card: #ffffff;
   --ink: #142029;
   --ink-2: #42515d;
@@ -53,7 +54,7 @@ button { font: inherit; color: inherit; }
 
 /* top bar */
 .topbar { position: sticky; top: 0; z-index: 30; transition: background .3s, box-shadow .3s; }
-.topbar.scrolled { background: rgba(251, 252, 252, .88); -webkit-backdrop-filter: saturate(1.4) blur(10px);
+.topbar.scrolled { background: rgba(255, 255, 255, .88); -webkit-backdrop-filter: saturate(1.4) blur(10px);
   backdrop-filter: saturate(1.4) blur(10px); box-shadow: 0 1px 0 var(--rule); }
 .top { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 16px; }
 .progress { position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--ink);
@@ -96,10 +97,30 @@ h1 { font-family: var(--display); font-weight: 500; font-size: clamp(36px, 4.4vw
 
 /* map */
 .map { margin: 0; padding-block: 28px 8px; }
-.map-scroll { position: relative; }
-.map svg { display: block; width: 100%; height: auto; overflow: visible; }
+.map-scroll { position: relative; aspect-ratio: 2400 / 1309; }
+.map-base, .map-still, .map-vid, .map-scroll > svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.map-still, .map-vid { display: block; object-fit: fill; }
+.map-scroll > svg { overflow: visible; }
+/* the video is rendered on pure white and multiplied onto the page, so no box shows around it */
+.map-vid { display: none; mix-blend-mode: multiply; }
+.js .map-vid { display: block; }
+.js .map-still { display: none; }
+.js.rm .map-vid { display: none; }
+.js.rm .map-still { display: block; }
+.js .map-base { -webkit-clip-path: inset(0 100% 0 0); clip-path: inset(0 100% 0 0);
+  transition: clip-path 1.7s cubic-bezier(.65, .05, .25, 1), -webkit-clip-path 1.7s cubic-bezier(.65, .05, .25, 1); }
+.js .map.is-in .map-base { -webkit-clip-path: inset(0 0 0 0); clip-path: inset(0 0 0 0); }
+.clock { position: absolute; left: 1%; bottom: 5%; display: grid; gap: 2px; font-size: 13px; color: var(--ink-3); }
+.clock b { font-family: var(--display); font-size: clamp(18px, 2.3vw, 30px); font-weight: 600; color: var(--ink); line-height: 1.05;
+  font-variant-numeric: tabular-nums; }
+.clock .dl { display: block; width: clamp(90px, 12vw, 160px); height: 3px; border-radius: 2px; background: var(--rule);
+  margin-top: 6px; overflow: hidden; visibility: hidden; }
+.clock.live .dl { visibility: visible; }
+.clock .dl i { display: block; height: 100%; width: 0; background: var(--ink); transition: width .3s linear; }
+.js .clock { opacity: 0; transition: opacity .6s ease 1.6s; }
+.js .map.is-in .clock { opacity: 1; }
 .map .iso { font: 500 23px var(--body); fill: var(--ink); fill-opacity: .72; }
-.map .city { font: 500 27px var(--body); fill: var(--ink); paint-order: stroke; stroke: rgba(251, 252, 252, .9);
+.map .city { font: 500 27px var(--body); fill: var(--ink); paint-order: stroke; stroke: rgba(255, 255, 255, .9);
   stroke-width: 7px; stroke-linejoin: round; pointer-events: none; }
 .map .city .t { font-weight: 600; }
 .map .call { stroke: var(--ink); stroke-width: 1.6; opacity: .55; }
@@ -168,7 +189,7 @@ h3 { font-size: 19px; font-weight: 600; margin: 0 0 8px; line-height: 1.3; }
   border-bottom: 8px solid var(--ink-3); border-top: 0; }
 .loop span { position: absolute; left: 50%; bottom: -12px; transform: translateX(-50%); background: var(--paper);
   padding: 0 12px; font-size: 13.5px; color: var(--ink-2); white-space: nowrap; }
-.stage { margin-top: 30px; border: 1px solid var(--rule); border-radius: 18px; background: var(--card);
+.stage { margin-top: 30px; border: 1px solid var(--rule); border-radius: 18px; background: var(--panel);
   padding: clamp(20px, 3.2vw, 40px); position: relative; }
 .panel { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 7fr); gap: 28px 52px; align-items: start; }
 .panels { display: grid; }
@@ -307,15 +328,13 @@ h3 { font-size: 19px; font-weight: 600; margin: 0 0 8px; line-height: 1.3; }
 .js .shots.is-in .phone { opacity: 1; }
 .shots-cap { margin: 52px 0 0; font-size: 14.5px; color: var(--ink-3); }
 
-/* tested */
-.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; margin: 40px 0 0; }
+/* numbers */
+.statband { padding-block: 40px clamp(48px, 6vw, 72px); }
+.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; margin: 0; }
 .stats > div { border-top: 2px solid var(--ink); padding-top: 14px; }
 .stats b { display: block; font-family: var(--display); font-weight: 500; font-size: clamp(34px, 4vw, 48px); line-height: 1.05;
   letter-spacing: -0.01em; }
 .stats .lbl { display: block; font-size: 14.5px; color: var(--ink-2); margin-top: 6px; }
-.checks { list-style: none; margin: 36px 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 56px; }
-.checks li { padding: 14px 0; border-top: 1px solid var(--rule); color: var(--ink-2); }
-.checks strong { color: var(--ink); font-weight: 600; }
 
 /* stack */
 .stack { display: flex; flex-wrap: wrap; gap: 10px; list-style: none; padding: 0; margin: 28px 0 0; }
@@ -346,7 +365,6 @@ footer .who { text-align: right; }
   .day li { padding: 0 0 22px 24px; }
   .day li::before { top: 5px; left: -5px; }
   .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .checks { grid-template-columns: minmax(0, 1fr); }
   .map figcaption { grid-template-columns: minmax(0, 1fr); }
   footer .who { text-align: left; }
 }
@@ -370,7 +388,8 @@ footer .who { text-align: right; }
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; transition-delay: 0s !important; }
   .js [data-reveal], .js .day li, .js .shots .phone { opacity: 1; transform: none; }
-  .js .map .isos, .js .map .ap .city, .js .map .ap .call { opacity: 1; }
+  .js .map .ap .city, .js .map .ap .call, .js .clock { opacity: 1; }
+  .js .map-base { clip-path: none; -webkit-clip-path: none; }
   .js .map .ap circle.d { transform: none; }
   .js .day::before { transform: none; }
 }
@@ -395,9 +414,9 @@ footer .who { text-align: right; }
     <section class="hero" aria-labelledby="hero-h">
       <h1 id="hero-h">Isotherm forecasts the day&rsquo;s high temperature and trades on it.</h1>
       <div data-reveal style="--i: 6">
-        <p class="lede">It runs around the clock on Kalshi&rsquo;s daily temperature markets in 24 U.S. cities, built entirely on
-          free NOAA and ECMWF data. Each forecast is blended with live market prices, and Isotherm only trades where the
-          price sits far enough from its estimate.</p>
+        <p class="lede">Isotherm trades Kalshi&rsquo;s daily temperature markets in 24 U.S. cities, around the clock, on free
+          weather data. The night before, its forecast is 0.35&nbsp;&deg;F more accurate than NOAA&rsquo;s flagship forecast,
+          and it only bets where the market&rsquo;s price is off.</p>
         <div class="actions">
           <a class="btn primary" href="#how">See how it works</a>
           <a class="btn" href="https://github.com/shourya0mehta/isotherm">View the code</a>
@@ -411,23 +430,33 @@ footer .who { text-align: right; }
 
     <figure class="map" aria-labelledby="map-cap" data-reveal>
       <div class="map-scroll">
-<svg viewBox="0 0 2400 1309" role="group" aria-label="Map of the day's high temperature across the lower 48 states on October 11, 2026"><defs><clipPath id="sweep"><rect id="sweep-rect" x="0" y="0" width="2400" height="1309"/></clipPath></defs><image href="assets/map.webp" width="2400" height="1309" clip-path="url(#sweep)"/><g class="isos" aria-hidden="true"><text class="iso" x="628" y="254" text-anchor="middle" dominant-baseline="central" transform="rotate(-43.7 628 254)">30°</text><text class="iso" x="899" y="146" text-anchor="middle" dominant-baseline="central" transform="rotate(-39.7 899 146)">40°</text><text class="iso" x="305" y="587" text-anchor="middle" dominant-baseline="central" transform="rotate(-284.3 305 587)">50°</text><text class="iso" x="652" y="526" text-anchor="middle" dominant-baseline="central" transform="rotate(-3.6 652 526)">50°</text><text class="iso" x="223" y="232" text-anchor="middle" dominant-baseline="central" transform="rotate(-57.9 223 232)">60°</text><text class="iso" x="769" y="709" text-anchor="middle" dominant-baseline="central" transform="rotate(-318.9 769 709)">60°</text><text class="iso" x="1233" y="194" text-anchor="middle" dominant-baseline="central" transform="rotate(-56.4 1233 194)">60°</text><text class="iso" x="1978" y="240" text-anchor="middle" dominant-baseline="central" transform="rotate(-60.9 1978 240)">60°</text><text class="iso" x="1084" y="424" text-anchor="middle" dominant-baseline="central" transform="rotate(-74.3 1084 424)">70°</text><text class="iso" x="1498" y="269" text-anchor="middle" dominant-baseline="central" transform="rotate(-42.0 1498 269)">70°</text><text class="iso" x="1749" y="628" text-anchor="middle" dominant-baseline="central" transform="rotate(-50.7 1749 628)">70°</text><text class="iso" x="874" y="960" text-anchor="middle" dominant-baseline="central" transform="rotate(-326.9 874 960)">90°</text><text class="iso" x="1052" y="624" text-anchor="middle" dominant-baseline="central" transform="rotate(-45.7 1052 624)">90°</text><text class="iso" x="1112" y="1250" text-anchor="middle" dominant-baseline="central" transform="rotate(-286.4 1112 1250)">90°</text><text class="iso" x="1265" y="797" text-anchor="middle" dominant-baseline="central" transform="rotate(-343.0 1265 797)">90°</text></g><g><g class="ap" tabindex="0" role="img" aria-label="San Francisco, official high 65 degrees" data-city="San Francisco" data-station="San Francisco International Airport" data-high="65" style="--d:0.000"><text class="city" x="197" y="579">San Francisco <tspan class="t">65&#176;</tspan></text><circle class="hit" cx="180" cy="570" r="24"/><circle class="d" cx="180" cy="570" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="Los Angeles, official high 74 degrees" data-city="Los Angeles" data-station="LAX" data-high="74" style="--d:0.057"><text class="city" x="272" y="792" text-anchor="end">Los Angeles <tspan class="t">74&#176;</tspan></text><circle class="hit" cx="289" cy="783" r="24"/><circle class="d" cx="289" cy="783" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="Seattle, official high 60 degrees" data-city="Seattle" data-station="Seattle-Tacoma Airport" data-high="60" style="--d:0.069"><text class="city" x="328" y="116">Seattle <tspan class="t">60&#176;</tspan></text><circle class="hit" cx="310" cy="107" r="24"/><circle class="d" cx="310" cy="107" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="San Diego, official high 73 degrees" data-city="San Diego" data-station="San Diego International Airport" data-high="73" style="--d:0.076"><text class="city" x="307" y="861" text-anchor="end">San Diego <tspan class="t">73&#176;</tspan></text><circle class="hit" cx="324" cy="852" r="24"/><circle class="d" cx="324" cy="852" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="Las Vegas, official high 74 degrees" data-city="Las Vegas" data-station="Harry Reid Airport" data-high="74" style="--d:0.136"><text class="city" x="454" y="717">Las Vegas <tspan class="t">74&#176;</tspan></text><circle class="hit" cx="437" cy="708" r="24"/><circle class="d" cx="437" cy="708" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="Phoenix, official high 89 degrees" data-city="Phoenix" data-station="Sky Harbor Airport" data-high="89" style="--d:0.190"><text class="city" x="556" y="866">Phoenix <tspan class="t">89&#176;</tspan></text><circle class="hit" cx="539" cy="857" r="24"/><circle class="d" cx="539" cy="857" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="Denver, official high 85 degrees" data-city="Denver" data-station="Denver International Airport" data-high="85" style="--d:0.360"><text class="city" x="879" y="590">Denver <tspan class="t">85&#176;</tspan></text><circle class="hit" cx="862" cy="581" r="24"/><circle class="d" cx="862" cy="581" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="San Antonio, official high 90 degrees" data-city="San Antonio" data-station="San Antonio International Airport" data-high="90" style="--d:0.480"><text class="city" x="1071" y="1132" text-anchor="end">San Antonio <tspan class="t">90&#176;</tspan></text><circle class="hit" cx="1088" cy="1095" r="24"/><circle class="d" cx="1088" cy="1095" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="Austin, official high 94 degrees" data-city="Austin" data-station="Austin-Bergstrom Airport" data-high="94" style="--d:0.497"><text class="city" x="1105" y="1068" text-anchor="end">Austin <tspan class="t">94&#176;</tspan></text><circle class="hit" cx="1122" cy="1063" r="24"/><circle class="d" cx="1122" cy="1063" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="Oklahoma City, official high 90 degrees" data-city="Oklahoma City" data-station="Will Rogers Airport" data-high="90" style="--d:0.499"><text class="city" x="1142" y="817">Oklahoma City <tspan class="t">90&#176;</tspan></text><circle class="hit" cx="1125" cy="808" r="24"/><circle class="d" cx="1125" cy="808" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="Dallas, official high 91 degrees" data-city="Dallas" data-station="Dallas/Fort Worth Airport" data-high="91" style="--d:0.512"><text class="city" x="1165" y="939">Dallas <tspan class="t">91&#176;</tspan></text><circle class="hit" cx="1148" cy="930" r="24"/><circle class="d" cx="1148" cy="930" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="Houston, official high 90 degrees" data-city="Houston" data-station="Hobby Airport" data-high="90" style="--d:0.552"><text class="city" x="1242" y="1098">Houston <tspan class="t">90&#176;</tspan></text><circle class="hit" cx="1224" cy="1089" r="24"/><circle class="d" cx="1224" cy="1089" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="Minneapolis, official high 90 degrees" data-city="Minneapolis" data-station="Minneapolis-St. Paul Airport" data-high="90" style="--d:0.580"><text class="city" x="1295" y="350">Minneapolis <tspan class="t">90&#176;</tspan></text><circle class="hit" cx="1278" cy="341" r="24"/><circle class="d" cx="1278" cy="341" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="New Orleans, official high 87 degrees" data-city="New Orleans" data-station="New Orleans Airport" data-high="87" style="--d:0.665"><text class="city" x="1456" y="1070">New Orleans <tspan class="t">87&#176;</tspan></text><circle class="hit" cx="1438" cy="1060" r="24"/><circle class="d" cx="1438" cy="1060" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="Chicago, official high 78 degrees" data-city="Chicago" data-station="Midway Airport" data-high="78" style="--d:0.689"><text class="city" x="1501" y="486">Chicago <tspan class="t">78&#176;</tspan></text><circle class="hit" cx="1484" cy="477" r="24"/><circle class="d" cx="1484" cy="477" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="Louisville, official high 67 degrees" data-city="Louisville" data-station="Louisville Airport" data-high="67" style="--d:0.739"><text class="city" x="1596" y="652">Louisville <tspan class="t">67&#176;</tspan></text><circle class="hit" cx="1579" cy="643" r="24"/><circle class="d" cx="1579" cy="643" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="Atlanta, official high 70 degrees" data-city="Atlanta" data-station="Hartsfield-Jackson Airport" data-high="70" style="--d:0.782"><text class="city" x="1677" y="866">Atlanta <tspan class="t">70&#176;</tspan></text><circle class="hit" cx="1660" cy="856" r="24"/><circle class="d" cx="1660" cy="856" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="Miami, official high 90 degrees" data-city="Miami" data-station="Miami International Airport" data-high="90" style="--d:0.907"><text class="city" x="1914" y="1218">Miami <tspan class="t">90&#176;</tspan></text><circle class="hit" cx="1897" cy="1209" r="24"/><circle class="d" cx="1897" cy="1209" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="Washington, official high 67 degrees" data-city="Washington" data-station="Reagan National Airport" data-high="67" style="--d:0.909"><line class="call" x1="1900" y1="553" x2="2140" y2="577"/><text class="city" x="2150" y="586">Washington <tspan class="t">67&#176;</tspan></text><circle class="hit" cx="1900" cy="553" r="24"/><circle class="d" cx="1900" cy="553" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="Philadelphia, official high 65 degrees" data-city="Philadelphia" data-station="Philadelphia International Airport" data-high="65" style="--d:0.938"><line class="call" x1="1955" y1="489" x2="2140" y2="534"/><text class="city" x="2150" y="543">Philadelphia <tspan class="t">65&#176;</tspan></text><circle class="hit" cx="1955" cy="489" r="24"/><circle class="d" cx="1955" cy="489" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="Trenton, official high 61 degrees" data-city="Trenton" data-station="Trenton-Mercer Airport" data-high="61" style="--d:0.943"><line class="call" x1="1965" y1="466" x2="2140" y2="491"/><text class="city" x="2150" y="500">Trenton <tspan class="t">61&#176;</tspan></text><circle class="hit" cx="1965" cy="466" r="24"/><circle class="d" cx="1965" cy="466" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="Newark, official high 62 degrees" data-city="Newark" data-station="Newark Liberty Airport" data-high="62" style="--d:0.953"><line class="call" x1="1984" y1="441" x2="2140" y2="448"/><text class="city" x="2150" y="457">Newark <tspan class="t">62&#176;</tspan></text><circle class="hit" cx="1984" cy="441" r="24"/><circle class="d" cx="1984" cy="441" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="New York, official high 60 degrees" data-city="New York" data-station="Central Park" data-high="60" style="--d:0.956"><line class="call" x1="1990" y1="435" x2="2140" y2="405"/><text class="city" x="2150" y="414">New York <tspan class="t">60&#176;</tspan></text><circle class="hit" cx="1990" cy="435" r="24"/><circle class="d" cx="1990" cy="435" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="Boston, official high 60 degrees" data-city="Boston" data-station="Logan Airport" data-high="60" style="--d:1.000"><text class="city" x="2090" y="340">Boston <tspan class="t">60&#176;</tspan></text><circle class="hit" cx="2073" cy="331" r="24"/><circle class="d" cx="2073" cy="331" r="8.5"/></g></g></svg>
+        <div class="map-base">
+          <img class="map-still" src="assets/map.webp" width="2400" height="1308" alt="">
+          <video class="map-vid" id="mapvid" muted loop playsinline preload="none" aria-hidden="true"></video>
+        </div>
+<svg viewBox="0 0 2400 1309" role="group" aria-label="Map of the day's high temperature across the lower 48 states on October 11, 2026"><g><g class="ap" tabindex="0" role="img" aria-label="San Francisco, official high 65 degrees" data-city="San Francisco" data-station="San Francisco International Airport" data-high="65" style="--d:0.000"><text class="city" x="197" y="579">San Francisco <tspan class="t">65&#176;</tspan></text><circle class="hit" cx="180" cy="570" r="24"/><circle class="d" cx="180" cy="570" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="Los Angeles, official high 74 degrees" data-city="Los Angeles" data-station="LAX" data-high="74" style="--d:0.057"><text class="city" x="272" y="792" text-anchor="end">Los Angeles <tspan class="t">74&#176;</tspan></text><circle class="hit" cx="289" cy="783" r="24"/><circle class="d" cx="289" cy="783" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="Seattle, official high 60 degrees" data-city="Seattle" data-station="Seattle-Tacoma Airport" data-high="60" style="--d:0.069"><text class="city" x="328" y="116">Seattle <tspan class="t">60&#176;</tspan></text><circle class="hit" cx="310" cy="107" r="24"/><circle class="d" cx="310" cy="107" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="San Diego, official high 73 degrees" data-city="San Diego" data-station="San Diego International Airport" data-high="73" style="--d:0.076"><text class="city" x="307" y="861" text-anchor="end">San Diego <tspan class="t">73&#176;</tspan></text><circle class="hit" cx="324" cy="852" r="24"/><circle class="d" cx="324" cy="852" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="Las Vegas, official high 74 degrees" data-city="Las Vegas" data-station="Harry Reid Airport" data-high="74" style="--d:0.136"><text class="city" x="454" y="717">Las Vegas <tspan class="t">74&#176;</tspan></text><circle class="hit" cx="437" cy="708" r="24"/><circle class="d" cx="437" cy="708" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="Phoenix, official high 89 degrees" data-city="Phoenix" data-station="Sky Harbor Airport" data-high="89" style="--d:0.190"><text class="city" x="556" y="866">Phoenix <tspan class="t">89&#176;</tspan></text><circle class="hit" cx="539" cy="857" r="24"/><circle class="d" cx="539" cy="857" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="Denver, official high 85 degrees" data-city="Denver" data-station="Denver International Airport" data-high="85" style="--d:0.360"><text class="city" x="879" y="590">Denver <tspan class="t">85&#176;</tspan></text><circle class="hit" cx="862" cy="581" r="24"/><circle class="d" cx="862" cy="581" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="San Antonio, official high 90 degrees" data-city="San Antonio" data-station="San Antonio International Airport" data-high="90" style="--d:0.480"><text class="city" x="1071" y="1132" text-anchor="end">San Antonio <tspan class="t">90&#176;</tspan></text><circle class="hit" cx="1088" cy="1095" r="24"/><circle class="d" cx="1088" cy="1095" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="Austin, official high 94 degrees" data-city="Austin" data-station="Austin-Bergstrom Airport" data-high="94" style="--d:0.497"><text class="city" x="1105" y="1068" text-anchor="end">Austin <tspan class="t">94&#176;</tspan></text><circle class="hit" cx="1122" cy="1063" r="24"/><circle class="d" cx="1122" cy="1063" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="Oklahoma City, official high 90 degrees" data-city="Oklahoma City" data-station="Will Rogers Airport" data-high="90" style="--d:0.499"><text class="city" x="1142" y="817">Oklahoma City <tspan class="t">90&#176;</tspan></text><circle class="hit" cx="1125" cy="808" r="24"/><circle class="d" cx="1125" cy="808" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="Dallas, official high 91 degrees" data-city="Dallas" data-station="Dallas/Fort Worth Airport" data-high="91" style="--d:0.512"><text class="city" x="1165" y="939">Dallas <tspan class="t">91&#176;</tspan></text><circle class="hit" cx="1148" cy="930" r="24"/><circle class="d" cx="1148" cy="930" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="Houston, official high 90 degrees" data-city="Houston" data-station="Hobby Airport" data-high="90" style="--d:0.552"><text class="city" x="1242" y="1098">Houston <tspan class="t">90&#176;</tspan></text><circle class="hit" cx="1224" cy="1089" r="24"/><circle class="d" cx="1224" cy="1089" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="Minneapolis, official high 90 degrees" data-city="Minneapolis" data-station="Minneapolis-St. Paul Airport" data-high="90" style="--d:0.580"><text class="city" x="1295" y="350">Minneapolis <tspan class="t">90&#176;</tspan></text><circle class="hit" cx="1278" cy="341" r="24"/><circle class="d" cx="1278" cy="341" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="New Orleans, official high 87 degrees" data-city="New Orleans" data-station="New Orleans Airport" data-high="87" style="--d:0.665"><text class="city" x="1456" y="1070">New Orleans <tspan class="t">87&#176;</tspan></text><circle class="hit" cx="1438" cy="1060" r="24"/><circle class="d" cx="1438" cy="1060" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="Chicago, official high 78 degrees" data-city="Chicago" data-station="Midway Airport" data-high="78" style="--d:0.689"><text class="city" x="1501" y="486">Chicago <tspan class="t">78&#176;</tspan></text><circle class="hit" cx="1484" cy="477" r="24"/><circle class="d" cx="1484" cy="477" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="Louisville, official high 67 degrees" data-city="Louisville" data-station="Louisville Airport" data-high="67" style="--d:0.739"><text class="city" x="1596" y="652">Louisville <tspan class="t">67&#176;</tspan></text><circle class="hit" cx="1579" cy="643" r="24"/><circle class="d" cx="1579" cy="643" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="Atlanta, official high 70 degrees" data-city="Atlanta" data-station="Hartsfield-Jackson Airport" data-high="70" style="--d:0.782"><text class="city" x="1677" y="866">Atlanta <tspan class="t">70&#176;</tspan></text><circle class="hit" cx="1660" cy="856" r="24"/><circle class="d" cx="1660" cy="856" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="Miami, official high 90 degrees" data-city="Miami" data-station="Miami International Airport" data-high="90" style="--d:0.907"><text class="city" x="1914" y="1218">Miami <tspan class="t">90&#176;</tspan></text><circle class="hit" cx="1897" cy="1209" r="24"/><circle class="d" cx="1897" cy="1209" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="Washington, official high 67 degrees" data-city="Washington" data-station="Reagan National Airport" data-high="67" style="--d:0.909"><line class="call" x1="1900" y1="553" x2="2140" y2="577"/><text class="city" x="2150" y="586">Washington <tspan class="t">67&#176;</tspan></text><circle class="hit" cx="1900" cy="553" r="24"/><circle class="d" cx="1900" cy="553" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="Philadelphia, official high 65 degrees" data-city="Philadelphia" data-station="Philadelphia International Airport" data-high="65" style="--d:0.938"><line class="call" x1="1955" y1="489" x2="2140" y2="534"/><text class="city" x="2150" y="543">Philadelphia <tspan class="t">65&#176;</tspan></text><circle class="hit" cx="1955" cy="489" r="24"/><circle class="d" cx="1955" cy="489" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="Trenton, official high 61 degrees" data-city="Trenton" data-station="Trenton-Mercer Airport" data-high="61" style="--d:0.943"><line class="call" x1="1965" y1="466" x2="2140" y2="491"/><text class="city" x="2150" y="500">Trenton <tspan class="t">61&#176;</tspan></text><circle class="hit" cx="1965" cy="466" r="24"/><circle class="d" cx="1965" cy="466" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="Newark, official high 62 degrees" data-city="Newark" data-station="Newark Liberty Airport" data-high="62" style="--d:0.953"><line class="call" x1="1984" y1="441" x2="2140" y2="448"/><text class="city" x="2150" y="457">Newark <tspan class="t">62&#176;</tspan></text><circle class="hit" cx="1984" cy="441" r="24"/><circle class="d" cx="1984" cy="441" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="New York, official high 60 degrees" data-city="New York" data-station="Central Park" data-high="60" style="--d:0.956"><line class="call" x1="1990" y1="435" x2="2140" y2="405"/><text class="city" x="2150" y="414">New York <tspan class="t">60&#176;</tspan></text><circle class="hit" cx="1990" cy="435" r="24"/><circle class="d" cx="1990" cy="435" r="8.5"/></g><g class="ap" tabindex="0" role="img" aria-label="Boston, official high 60 degrees" data-city="Boston" data-station="Logan Airport" data-high="60" style="--d:1.000"><text class="city" x="2090" y="340">Boston <tspan class="t">60&#176;</tspan></text><circle class="hit" cx="2073" cy="331" r="24"/><circle class="d" cx="2073" cy="331" r="8.5"/></g></g></svg>
+        <div class="clock" id="clock" aria-hidden="true"><b id="clk">Sunday&rsquo;s high</b><span id="clk-sub">NOAA HRRR, 3 km</span><i class="dl"><i id="dlf"></i></i></div>
         <div class="tip" id="tip" role="status" aria-live="polite"></div>
       </div>
       <figcaption>
         <div class="legend" aria-hidden="true"><span style="background:#4b5fa6"></span><span style="background:#5576b8"></span><span style="background:#5f8fc6"></span><span style="background:#6aa9cf"></span><span style="background:#77c0ca"></span><span style="background:#8ccfb4"></span><span style="background:#a9d99c"></span><span style="background:#cadf8b"></span><span style="background:#e6dc80"></span><span style="background:#f2c96f"></span><span style="background:#f4ae5f"></span><span style="background:#ee9152"></span><span style="background:#e2724a"></span><span style="background:#cf5445"></span><span style="background:#b53e45"></span><span style="background:#932f48"></span><b style="grid-column:2">40&#176;</b><b style="grid-column:6">60&#176;</b><b style="grid-column:10">80&#176;</b><b style="grid-column:14">100&#176;</b></div>
-        <p id="map-cap">The day&rsquo;s high across the lower 48 on Sunday, October 11, 2026, from NOAA&rsquo;s 3 km HRRR model, with
-          the official National Weather Service high in each city Isotherm trades. Lines are isotherms, 10&nbsp;&deg;F apart.
-          Hover a city for its reading.</p>
+        <p id="map-cap">Temperatures across the lower 48 through Sunday, October 11, 2026, hour by hour from NOAA&rsquo;s 3 km HRRR
+          model, looping from 8 AM to 7 AM the next morning. Lines are isotherms, 10&nbsp;&deg;F apart. Each city shows its
+          official National Weather Service high for the day; hover one for its reading.</p>
       </figcaption>
     </figure>
 
-    <section class="block" id="how" aria-labelledby="how-h">
-      <div class="head" data-reveal>
-        <h2 id="how-h">How it works</h2>
-        <p>Follow one market, Chicago&rsquo;s high for tomorrow, through the five stages Isotherm runs every day on one small
-          cloud server. The numbers are an example; the steps and the math are the real ones. Click a stage, or let it play.</p>
+    <section class="statband" aria-label="Isotherm in numbers">
+      <div class="stats" data-stagger>
+        <div><b data-count="24">24</b><span class="lbl">U.S. cities, re-forecast six times a day</span></div>
+        <div><b><span data-count="1.57" data-dec="2">1.57</span>&nbsp;&deg;F</b><span class="lbl">average miss the night before, against 1.92&nbsp;&deg;F for NOAA&rsquo;s flagship forecast</span></div>
+        <div><b data-count="622">622</b><span class="lbl">automated tests</span></div>
+        <div><b data-count="40000">40,000</b><span class="lbl">chaos-test cycles with API failures injected</span></div>
       </div>
+    </section>
+
+    <section class="block" id="how" aria-labelledby="how-h">
+      <h2 id="how-h" data-reveal>How it works</h2>
 
       <div class="pipe" data-reveal>
         <ol class="nodes" role="tablist" aria-label="Stages">
@@ -585,28 +614,6 @@ footer .who { text-align: right; }
       <p class="shots-cap">Shown with made-up sample data. The live dashboard is private.</p>
     </section>
 
-    <section class="block" id="tested" aria-labelledby="test-h">
-      <div class="head" data-reveal>
-        <h2 id="test-h">Tested before it touched money</h2>
-        <p>Model changes had to beat the version before them on rules written down before the test, and the trading code
-          ran on Kalshi&rsquo;s demo exchange before a real dollar went in.</p>
-      </div>
-      <div class="stats" data-stagger>
-        <div><b data-count="622">622</b><span class="lbl">automated tests</span></div>
-        <div><b data-count="40000">40,000</b><span class="lbl">chaos-test cycles with API failures injected</span></div>
-        <div><b><span data-count="1.57" data-dec="2">1.57</span>&nbsp;&deg;F</b><span class="lbl">average miss the night before</span></div>
-        <div><b data-count="24">24</b><span class="lbl">cities, re-forecast six times a day</span></div>
-      </div>
-      <ul class="checks" data-stagger>
-        <li><strong>Walk-forward tests.</strong> Every model is scored only on days after the ones it learned from.</li>
-        <li><strong>A blind holdout.</strong> October and November are set aside and scored once, on December 1, by frozen scripts.</li>
-        <li><strong>A leakage audit.</strong> Inputs rebuilt from data cut off at each decision time came out identical.</li>
-        <li><strong>Market replays.</strong> The real trading code, run on recorded order books with pessimistic fill rules.</li>
-        <li><strong>A rival bot.</strong> On Kalshi&rsquo;s demo exchange, a second account traded against Isotherm on purpose.</li>
-        <li><strong>Staged rollout.</strong> Real money went in at a fraction of full size, with each stage gated on clean days.</li>
-      </ul>
-    </section>
-
     <section class="block" aria-labelledby="stack-h">
       <h2 id="stack-h" data-reveal>Built with</h2>
       <ul class="stack" data-stagger>
@@ -631,6 +638,7 @@ footer .who { text-align: right; }
   const root = document.documentElement;
   root.classList.add("js");
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduce) root.classList.add("rm");
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
   const raf = (f) => requestAnimationFrame(f);
@@ -694,20 +702,35 @@ footer .who { text-align: right; }
     }, { once: true });
   });
 
-  /* map: west-to-east sweep, cities pop in, tooltips */
-  const sweep = $("#sweep-rect"), map = $("figure.map");
-  if (sweep && map) {
-    const W = +sweep.getAttribute("width");
-    if (!reduce) sweep.setAttribute("width", "0");
-    map.addEventListener("reveal", () => {
-      tween(1700, (t) => sweep.setAttribute("width", String(W * easeOut(t))));
-    }, { once: true });
+  /* map: west-to-east sweep (CSS), then the day plays hour by hour; cities pop in; tooltips */
+  const map = $("figure.map"), vid = $("#mapvid"), clock = $("#clock"), clk = $("#clk"), dlf = $("#dlf");
+  if (vid && map && !reduce) {
+    const ext = vid.canPlayType('video/mp4; codecs="avc1.640028"') ? "mp4" : "webm", sm = innerWidth < 760 ? "-sm" : "";
+    vid.poster = "assets/map-day-poster" + sm + ".webp";        // the 4 PM frame, where playback starts
+    vid.src = "assets/map-day" + sm + "." + ext;
+    vid.preload = "auto";
+    const FPS = 24, PER_HOUR = 10, START = 8;          // frames run from 8 AM ET Sunday, 10 frames an hour
+    const showTime = () => {
+      const idx = (vid.currentTime * FPS / PER_HOUR) % 24, et = START + idx, h = Math.floor(et) % 24;
+      clk.textContent = (et >= 24 ? "Mon " : "Sun ") + ((h % 12) || 12) + (h < 12 ? " AM" : " PM");
+      dlf.style.width = (idx / 24 * 100).toFixed(1) + "%";
+    };
+    vid.addEventListener("loadedmetadata", () => { try { vid.currentTime = 8 * PER_HOUR / FPS; } catch (e) { /* fine */ } }, { once: true });
+    let live = false;
+    vid.addEventListener("playing", () => { live = true; vid.classList.add("on"); clock.classList.add("live"); $("#clk-sub").textContent = "Eastern time, NOAA HRRR"; showTime(); }, { once: true });
+    vid.addEventListener("timeupdate", () => { if (live) showTime(); });
+    let ready = false;
+    map.addEventListener("reveal", () => { ready = true; setTimeout(() => { const p = vid.play(); if (p) p.catch(() => {}); }, 1500); }, { once: true });
+    new IntersectionObserver((es) => es.forEach((e) => {
+      if (!ready) return;
+      if (e.isIntersecting) { const p = vid.play(); if (p) p.catch(() => {}); } else vid.pause();
+    }), { threshold: 0.05 }).observe(map);
   }
   const tip = $("#tip"), box = $(".map-scroll");
   $$(".map .ap").forEach((g) => {
     const show = () => {
       const c = g.querySelector("circle.d").getBoundingClientRect(), b = box.getBoundingClientRect();
-      tip.innerHTML = "<b>" + g.dataset.city + "</b><span>" + g.dataset.station + "</span><span>Official high " + g.dataset.high + "&deg;F</span>";
+      tip.innerHTML = "<b>" + g.dataset.city + "</b><span>" + g.dataset.station + "</span><span>Sunday&rsquo;s official high " + g.dataset.high + "&deg;F</span>";
       tip.style.left = (c.left + c.width / 2 - b.left) + "px";
       tip.style.top = (c.top - b.top) + "px";
       tip.classList.add("on"); g.classList.add("hot");
