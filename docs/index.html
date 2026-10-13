@@ -38,7 +38,7 @@
 }
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; scroll-padding-top: 76px; }
-body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--body); font-size: 17px; line-height: 1.6;
+body { margin: 0; overflow-x: clip; background: var(--paper); color: var(--ink); font-family: var(--body); font-size: 17px; line-height: 1.6;
   font-variant-numeric: tabular-nums; }
 a { color: var(--link); text-underline-offset: 3px; text-decoration-thickness: 1px; }
 a:hover { text-decoration-thickness: 2px; }
@@ -48,8 +48,8 @@ button { font: inherit; color: inherit; }
 .wrap { max-width: 72rem; margin: 0 auto; padding-inline: clamp(16px, 4vw, 40px); }
 
 /* reveal on scroll (the brief asks for it; one easing, short stagger) */
-.js [data-reveal] { opacity: 0; transform: translateY(26px);
-  transition: opacity .7s var(--ease), transform .85s var(--ease); transition-delay: calc(var(--i, 0) * 80ms); }
+.js [data-reveal] { opacity: 0; transform: translateY(18px);
+  transition: opacity .55s var(--ease), transform .65s var(--ease); transition-delay: calc(var(--i, 0) * 60ms); }
 .js [data-reveal].is-in { opacity: 1; transform: none; }
 
 /* top bar */
@@ -71,15 +71,52 @@ button { font: inherit; color: inherit; }
 .nav a.gh:hover { background: var(--navy); color: #fff; }
 
 /* hero */
-.hero { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 24px 48px; align-items: start;
-  padding-block: clamp(28px, 6vw, 60px) 32px; border-bottom: 2px solid var(--ink); }
+.hero { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 36px 56px; align-items: center;
+  padding-block: clamp(28px, 5vw, 56px) 40px; border-bottom: 2px solid var(--ink); }
 h1 { font-family: var(--display); font-weight: 500; font-size: clamp(36px, 4.4vw, 56px); line-height: 1.05;
   letter-spacing: -0.015em; margin: 0; font-variation-settings: "opsz" 72; text-wrap: balance; }
 .js h1 .w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: .14em; margin-bottom: -.14em; }
 .js h1 .w > span { display: inline-block; transform: translateY(135%);
   transition: transform .95s var(--ease); transition-delay: calc(var(--i) * 55ms + 80ms); }
 .js h1.go .w > span { transform: none; }
-.lede { margin: 0; padding-top: 6px; color: var(--ink-2); max-width: 34rem; }
+.lede { margin: 22px 0 0; color: var(--ink-2); max-width: 36rem; }
+
+/* hero: one example trade, the same market the walkthrough follows */
+.ticket { border: 1px solid var(--rule); border-radius: 16px; background: var(--panel); padding: 20px 22px 18px;
+  box-shadow: 0 1px 2px rgba(20, 32, 41, .05), 0 22px 44px -28px rgba(20, 32, 41, .32); }
+.ticket .th { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.ticket .th b { font-family: var(--display); font-size: 22px; font-weight: 600; line-height: 1.2; }
+.tag { font-size: 12.5px; font-weight: 600; color: var(--ink-3); background: var(--wash); padding: 3px 10px; border-radius: 999px; white-space: nowrap; }
+.tbars { height: 96px; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; align-items: end;
+  border-bottom: 1.5px solid var(--ink); margin-top: 18px; }
+.tbars .g { height: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 3px; align-items: end; position: relative; }
+.tbars .g.pick::before { content: ""; position: absolute; inset: -8px -5px 0; border-radius: 8px 8px 0 0; background: #fbe7dd; }
+.tbars i { display: block; height: var(--h); border-radius: 3px 3px 0 0; position: relative; }
+.tbars .m { background: var(--mkt); }
+.tbars .p { background: var(--ink); }
+.tbars .pick .p { background: var(--warm); }
+.js .tbars i { height: 0; transition: height .75s var(--ease); transition-delay: calc(.35s + var(--k) * 70ms); }
+.js .tbars .p { transition-delay: calc(.95s + var(--k) * 70ms); }
+.js .ticket.is-in .tbars i { height: var(--h); }
+.txl { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; margin-top: 6px; font-size: 12.5px;
+  color: var(--ink-3); text-align: center; }
+.txl .pick { color: var(--ink); font-weight: 600; }
+.tleg { display: flex; gap: 16px; margin-top: 10px; font-size: 13px; color: var(--ink-3); }
+.tleg i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+.tdl { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 16px; align-items: baseline; margin: 16px 0 0;
+  padding-top: 14px; border-top: 1px solid var(--rule); font-size: 15px; }
+.tdl dt { color: var(--ink-2); }
+.tdl dd { margin: 0; font-family: var(--display); font-size: 22px; font-weight: 600; line-height: 1.15; text-align: right; }
+.tsteps { list-style: none; margin: 14px 0 0; padding: 14px 0 0; border-top: 1px solid var(--rule); display: grid; gap: 8px; font-size: 15px; }
+.tsteps li { display: flex; align-items: flex-start; gap: 10px; color: var(--ink); }
+.tsteps .ck { width: 19px; height: 19px; border-radius: 50%; display: grid; place-items: center; flex: none; margin-top: 2px;
+  font-size: 11px; font-weight: 700; color: #fff; background: var(--warm); }
+.tsteps li + li .ck { background: var(--good); }
+.js .tsteps li { opacity: 0; transform: translateX(-8px); transition: opacity .45s var(--ease), transform .5s var(--ease); }
+.js .tsteps li:first-child { transition-delay: 2.05s; }
+.js .tsteps li + li { transition-delay: 2.65s; }
+.js .ticket.is-in .tsteps li { opacity: 1; transform: none; }
+.tlink { display: inline-block; margin-top: 14px; font-size: 14.5px; font-weight: 600; }
 .actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-top: 20px; }
 .btn { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 18px; border-radius: 9px;
   font-weight: 600; font-size: 15px; text-decoration: none; border: 1.5px solid var(--navy); color: var(--navy);
@@ -318,7 +355,14 @@ h3 { font-size: 19px; font-weight: 600; margin: 0 0 8px; line-height: 1.3; }
 .day time { display: block; font-family: var(--display); font-size: 21px; font-weight: 600; line-height: 1.2; margin-bottom: 6px; }
 .day p { margin: 0; font-size: 15px; color: var(--ink-2); line-height: 1.5; }
 
-/* dashboard */
+/* dashboard: one full-bleed ink band */
+section.band { position: relative; isolation: isolate; border-top: 0; color: #dfe6eb; }
+section.band::before { content: ""; position: absolute; inset: 0 calc(50% - 50vw); background: var(--ink); z-index: -1; }
+section.band h2 { color: #fff; }
+section.band .head p { color: #b3bfc8; }
+section.band + section.block { border-top: 0; }
+section.band .shots .desk { border-color: rgba(255, 255, 255, .14); }
+section.band .shots .phone { border-color: #3a4a56; box-shadow: 0 28px 54px -24px rgba(0, 0, 0, .75); }
 .shots { position: relative; margin: 44px 0 0; padding-right: clamp(0px, 14vw, 170px); }
 .shots .desk { border: 1px solid var(--rule); border-radius: 12px; width: 100%; height: auto; }
 .shots .phone { position: absolute; right: 0; bottom: -28px; width: clamp(150px, 24vw, 280px); height: auto;
@@ -341,10 +385,17 @@ h3 { font-size: 19px; font-weight: 600; margin: 0 0 8px; line-height: 1.3; }
   background: var(--card); transition: transform .2s var(--ease), border-color .2s; }
 .stack li:hover { transform: translateY(-2px); border-color: var(--ink-3); }
 
+/* run it yourself */
+.cmd { margin: 30px 0 0; padding: 18px 22px; border-radius: 12px; background: var(--ink); color: #e3eaef; overflow-x: auto;
+  font: 14.5px/1.75 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: pre; }
+.run .note { margin: 14px 0 0; font-size: 14.5px; color: var(--ink-3); max-width: 46rem; }
+.run .actions { margin-top: 22px; }
+
 footer { border-top: 2px solid var(--ink); padding-block: 28px 56px; display: flex; justify-content: space-between;
   gap: 16px 48px; flex-wrap: wrap; font-size: 15px; color: var(--ink-2); }
 footer p { margin: 0 0 6px; }
 footer .who { text-align: right; }
+footer .fine { color: var(--ink-3); font-size: 14px; max-width: 34rem; }
 
 @media (max-width: 980px) {
   .nodes { gap: 14px; }
@@ -353,6 +404,7 @@ footer .who { text-align: right; }
 }
 @media (max-width: 860px) {
   .hero, .head { grid-template-columns: minmax(0, 1fr); }
+  .ticket { max-width: 520px; }
   .nav a.hide-sm { display: none; }
   .nodes { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; padding: 4px 2px 14px; gap: 10px; }
   .nodes::before, .loop { display: none; }
@@ -385,7 +437,8 @@ footer .who { text-align: right; }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; transition-delay: 0s !important; }
-  .js [data-reveal], .js .day li, .js .shots .phone { opacity: 1; transform: none; }
+  .js [data-reveal], .js .day li, .js .shots .phone, .js .tsteps li { opacity: 1; transform: none; }
+  .js .tbars i { height: var(--h); }
   .js .map .ap .city, .js .map .ap .call, .js .clock { opacity: 1; }
   .js .map-base { clip-path: none; -webkit-clip-path: none; }
   .js .map .ap circle.d { transform: none; }
@@ -398,9 +451,9 @@ footer .who { text-align: right; }
   <div class="wrap top">
     <a class="brand" href="#top" aria-label="Isotherm home"><img src="assets/mark.svg" alt="">Isotherm</a>
     <nav class="nav" aria-label="Sections">
+      <a class="hide-sm" href="#dashboard">Dashboard</a>
       <a class="hide-sm" href="#how">How it works</a>
       <a class="hide-sm" href="#day">A day in the market</a>
-      <a class="hide-sm" href="#dashboard">Dashboard</a>
       <a class="gh" href="https://github.com/shourya0mehta/isotherm">GitHub</a>
     </nav>
   </div>
@@ -410,6 +463,7 @@ footer .who { text-align: right; }
 <div class="wrap">
   <main id="top">
     <section class="hero" aria-labelledby="hero-h">
+      <div class="hero-copy">
       <h1 id="hero-h">Isotherm forecasts the day&rsquo;s high temperature and trades on it.</h1>
       <div data-reveal style="--i: 6">
         <p class="lede">Isotherm trades Kalshi&rsquo;s daily temperature markets in 24 U.S. cities, around the clock, on free
@@ -423,6 +477,23 @@ footer .who { text-align: right; }
           <span><i class="dot-live" aria-hidden="true"></i>Trading real money since October 2026</span>
           <span><i class="clock-ico" aria-hidden="true"></i><span id="next-run">Forecasts refresh six times a day</span></span>
         </div>
+      </div>
+      </div>
+
+      <div class="ticket" data-reveal style="--i: 4" role="group" aria-label="An example trade">
+        <div class="th"><b>Chicago high, tomorrow</b><span class="tag">Example</span></div>
+        <div class="tbars" aria-hidden="true"><div class="g"><i class="m" style="--h:12.5%;--k:0"></i><i class="p" style="--h:5.3%;--k:0"></i></div><div class="g"><i class="m" style="--h:35.0%;--k:1"></i><i class="p" style="--h:22.7%;--k:1"></i></div><div class="g"><i class="m" style="--h:82.5%;--k:2"></i><i class="p" style="--h:84.5%;--k:2"></i></div><div class="g pick"><i class="m" style="--h:67.5%;--k:3"></i><i class="p" style="--h:96.2%;--k:3"></i></div><div class="g"><i class="m" style="--h:37.5%;--k:4"></i><i class="p" style="--h:34.2%;--k:4"></i></div><div class="g"><i class="m" style="--h:15.0%;--k:5"></i><i class="p" style="--h:7.2%;--k:5"></i></div></div>
+        <div class="txl" aria-hidden="true"><span>&le;79</span><span>80&ndash;81</span><span>82&ndash;83</span><span class="pick">84&ndash;85</span><span>86&ndash;87</span><span>&ge;88</span></div>
+        <div class="tleg" aria-hidden="true"><span><i style="background: var(--mkt)"></i>Market</span><span><i style="background: var(--ink)"></i>Isotherm</span></div>
+        <dl class="tdl">
+          <dt>Market&rsquo;s chance of 84&ndash;85&deg;</dt><dd><span data-count="27">27</span>%</dd>
+          <dt>Isotherm&rsquo;s chance</dt><dd><span data-count="38.5" data-dec="1">38.5</span>%</dd>
+        </dl>
+        <ul class="tsteps">
+          <li><span class="ck" aria-hidden="true">&#10003;</span>Bought 5 YES at 28&cent;, an 8.5&cent; edge after the fee</li>
+          <li><span class="ck" aria-hidden="true">&#10003;</span>Settled at 84&deg;F for +$3.50</li>
+        </ul>
+        <a class="tlink" href="#how">Step through this example</a>
       </div>
     </section>
 
@@ -450,6 +521,21 @@ footer .who { text-align: right; }
         <div><b data-count="622">622</b><span class="lbl">automated tests</span></div>
         <div><b data-count="40000">40,000</b><span class="lbl">chaos-test cycles with API failures injected</span></div>
       </div>
+    </section>
+
+    <section class="block band" id="dashboard" aria-labelledby="dash-h">
+      <div class="head" data-reveal>
+        <h2 id="dash-h">A live dashboard, on any phone</h2>
+        <p>A private dashboard shows the account, the money at risk against every limit, profit by day, and which cities
+          and bet types are working. The trading server publishes encrypted numbers every minute and the page decrypts them on
+          the device, so it stays live without a laptop running anywhere.</p>
+      </div>
+      <figure class="shots" data-reveal>
+        <img class="desk" src="assets/dashboard-desktop.webp" width="2560" height="1800" loading="lazy"
+          alt="Isotherm dashboard on a desktop: bot health, account value, today's result, and capital in use against each limit, shown with made-up sample data.">
+        <img class="phone" id="phone" src="assets/dashboard-phone.webp" width="1170" height="2532" loading="lazy"
+          alt="Isotherm dashboard on a phone: the daily profit chart and seven-day summary, shown with made-up sample data.">
+      </figure>
     </section>
 
     <section class="block" id="how" aria-labelledby="how-h">
@@ -595,21 +681,6 @@ footer .who { text-align: right; }
       </ol>
     </section>
 
-    <section class="block" id="dashboard" aria-labelledby="dash-h">
-      <div class="head" data-reveal>
-        <h2 id="dash-h">A live dashboard, on any phone</h2>
-        <p>A private dashboard shows the account, the money at risk against every limit, profit by day, and which cities
-          and bet types are working. The trading server publishes encrypted numbers every minute and the page decrypts them on
-          the device, so it stays live without a laptop running anywhere.</p>
-      </div>
-      <figure class="shots" data-reveal>
-        <img class="desk" src="assets/dashboard-desktop.webp" width="2560" height="1800" loading="lazy"
-          alt="Isotherm dashboard on a desktop: bot health, account value, today's result, and capital in use against each limit, shown with made-up sample data.">
-        <img class="phone" id="phone" src="assets/dashboard-phone.webp" width="1170" height="2532" loading="lazy"
-          alt="Isotherm dashboard on a phone: the daily profit chart and seven-day summary, shown with made-up sample data.">
-      </figure>
-    </section>
-
     <section class="block" aria-labelledby="stack-h">
       <h2 id="stack-h" data-reveal>Built with</h2>
       <ul class="stack" data-stagger>
@@ -617,10 +688,32 @@ footer .who { text-align: right; }
         <li>Kalshi REST and WebSocket APIs</li><li>AWS EC2</li><li>systemd</li><li>Web Crypto</li><li>GitHub Pages</li>
       </ul>
     </section>
+
+    <section class="block run" id="run" aria-labelledby="run-h">
+      <div class="head" data-reveal>
+        <h2 id="run-h">Run it yourself</h2>
+        <p>Paper trading needs no Kalshi account. Isotherm reads Kalshi&rsquo;s live public order books and simulates its
+          fills against them, so you can watch it quote and trade without putting in a dollar.</p>
+      </div>
+      <div data-reveal>
+<pre class="cmd"><code>git clone https://github.com/shourya0mehta/isotherm
+cd isotherm &amp;&amp; pip install -r requirements.txt
+python -m wxbot run --config config/example.yaml --mode paper --minutes 30</code></pre>
+        <p class="note">The trained models stay private, so the public copy trades on its market-based fair value until you
+          train your own with the included research scripts.</p>
+        <div class="actions">
+          <a class="btn primary" href="https://github.com/shourya0mehta/isotherm">View the code on GitHub</a>
+          <a class="btn" href="https://github.com/shourya0mehta/isotherm#running-it">Read the setup notes</a>
+        </div>
+      </div>
+    </section>
   </main>
 
   <footer>
-    <p>Not affiliated with Kalshi.</p>
+    <div>
+      <p>Not affiliated with Kalshi.</p>
+      <p class="fine">Isotherm trades its own account. Nothing on this page is investment advice.</p>
+    </div>
     <div class="who">
       <p>Built by Shourya Mehta</p>
       <p><a href="https://github.com/shourya0mehta/isotherm">Code on GitHub</a></p>
@@ -742,7 +835,7 @@ footer .who { text-align: right; }
   const phone = $("#phone");
   function parallax() {
     if (!phone || reduce || innerWidth < 560) return;
-    const r = phone.getBoundingClientRect(); const off = (r.top + r.height / 2 - innerHeight / 2) * -0.06;
+    const r = phone.getBoundingClientRect(); const off = Math.max(-36, Math.min(36, (r.top + r.height / 2 - innerHeight / 2) * -0.06));
     phone.style.transform = "translateY(" + off.toFixed(1) + "px)";
   }
 
@@ -965,7 +1058,7 @@ footer .who { text-align: right; }
   $$("[data-stagger]").forEach((p) => Array.from(p.children).forEach((c, i) => { c.setAttribute("data-reveal", ""); c.style.setProperty("--i", i); }));
   const rev = new IntersectionObserver((es) => es.forEach((e) => {
     if (e.isIntersecting) { e.target.classList.add("is-in"); e.target.dispatchEvent(new CustomEvent("reveal")); rev.unobserve(e.target); }
-  }), { threshold: 0.12, rootMargin: "0px 0px -5% 0px" });
+  }), { threshold: 0.04, rootMargin: "0px 0px -2% 0px" });
   $$("[data-reveal]").forEach((el) => rev.observe(el));
   const sweepVisible = () => $$("[data-reveal]:not(.is-in)").forEach((el) => {
     const r = el.getBoundingClientRect();
