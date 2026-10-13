@@ -76,7 +76,7 @@ button { font: inherit; color: inherit; }
 h1 { font-family: var(--display); font-weight: 500; font-size: clamp(36px, 4.4vw, 56px); line-height: 1.05;
   letter-spacing: -0.015em; margin: 0; font-variation-settings: "opsz" 72; text-wrap: balance; }
 .js h1 .w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: .14em; margin-bottom: -.14em; }
-.js h1 .w > span { display: inline-block; transform: translateY(108%);
+.js h1 .w > span { display: inline-block; transform: translateY(135%);
   transition: transform .95s var(--ease); transition-delay: calc(var(--i) * 55ms + 80ms); }
 .js h1.go .w > span { transform: none; }
 .lede { margin: 0; padding-top: 6px; color: var(--ink-2); max-width: 34rem; }
@@ -671,6 +671,7 @@ footer .who { text-align: right; }
     h1.setAttribute("aria-label", h1.textContent.trim());
     h1.innerHTML = words.map((w, i) => '<span class="w" aria-hidden="true"><span style="--i:' + i + '">' + w + "</span></span>").join(" ");
     raf(() => raf(() => h1.classList.add("go")));
+    setTimeout(() => h1.classList.add("go"), 120);
   }
 
   /* next forecast refresh (decision times are fixed in UTC) */
@@ -970,6 +971,12 @@ footer .who { text-align: right; }
     if (e.isIntersecting) { e.target.classList.add("is-in"); e.target.dispatchEvent(new CustomEvent("reveal")); rev.unobserve(e.target); }
   }), { threshold: 0.12, rootMargin: "0px 0px -5% 0px" });
   $$("[data-reveal]").forEach((el) => rev.observe(el));
+  const sweepVisible = () => $$("[data-reveal]:not(.is-in)").forEach((el) => {
+    const r = el.getBoundingClientRect();
+    if (r.top < innerHeight && r.bottom > 0) { el.classList.add("is-in"); el.dispatchEvent(new CustomEvent("reveal")); rev.unobserve(el); }
+  });
+  setTimeout(sweepVisible, 900);
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) setTimeout(sweepVisible, 200); });
   addEventListener("scroll", onScroll, { passive: true }); onScroll();
 })();
 </script>
