@@ -61,6 +61,7 @@ button { font: inherit; color: inherit; }
   transform-origin: 0 50%; transform: scaleX(0); }
 .brand { display: inline-flex; align-items: center; gap: 10px; color: var(--ink); text-decoration: none;
   font-family: var(--display); font-weight: 600; font-size: 26px; letter-spacing: -0.01em; line-height: 1; }
+.brand { padding-block: 8px; margin-block: -8px; }
 .brand img { width: 30px; height: 30px; transition: transform .5s var(--ease); }
 .brand:hover img { transform: rotate(-8deg) scale(1.06); }
 .nav { display: flex; gap: 6px; font-size: 15px; }
@@ -116,7 +117,7 @@ h1 { font-family: var(--display); font-weight: 500; font-size: clamp(36px, 4.4vw
 .js .tsteps li:first-child { transition-delay: 2.05s; }
 .js .tsteps li + li { transition-delay: 2.65s; }
 .js .ticket.is-in .tsteps li { opacity: 1; transform: none; }
-.tlink { display: inline-block; margin-top: 14px; font-size: 14.5px; font-weight: 600; }
+.tlink { display: inline-block; margin: 2px 0 -12px; padding-block: 12px; font-size: 14.5px; font-weight: 600; }
 .actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-top: 20px; }
 .btn { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 18px; border-radius: 9px;
   font-weight: 600; font-size: 15px; text-decoration: none; border: 1.5px solid var(--navy); color: var(--navy);
@@ -399,6 +400,7 @@ footer { border-top: 2px solid var(--ink); padding-block: 28px 56px; display: fl
 footer p { margin: 0 0 6px; }
 footer .who { text-align: right; }
 footer .fine { color: var(--ink-3); font-size: 14px; max-width: 34rem; }
+footer a { display: inline-block; padding-block: 12px; margin-block: -12px; }
 
 @media (max-width: 980px) {
   .nodes { gap: 14px; }
@@ -409,6 +411,7 @@ footer .fine { color: var(--ink-3); font-size: 14px; max-width: 34rem; }
   .hero, .head { grid-template-columns: minmax(0, 1fr); }
   .ticket { max-width: 520px; }
   .nav a.hide-sm { display: none; }
+  .nav a.gh { display: inline-flex; align-items: center; min-height: 44px; }
   .nodes { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; padding: 4px 2px 14px; gap: 10px; }
   .nodes::before, .loop { display: none; }
   .nodes li { flex: 0 0 158px; scroll-snap-align: start; }
