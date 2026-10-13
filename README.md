@@ -13,11 +13,6 @@ its estimate. It has traded real money since October 2026.
 
 [![tests](https://github.com/shourya0mehta/isotherm/actions/workflows/tests.yml/badge.svg)](https://github.com/shourya0mehta/isotherm/actions/workflows/tests.yml)
 
-![Map of the day's high across the lower 48, with the official high in the 24 cities Isotherm trades](docs/assets/map-labeled.webp)
-
-<sub>The day's high across the lower 48 from NOAA's 3 km HRRR model, with the official high in each city Isotherm
-trades. Lines are isotherms, 10 °F apart.</sub>
-
 ## The dashboard
 
 A private dashboard shows the account, the money at risk against every limit, profit by day, and which cities and bet
