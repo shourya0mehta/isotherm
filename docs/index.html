@@ -153,7 +153,8 @@ h1 { font-family: var(--display); font-weight: 500; font-size: clamp(36px, 4.4vw
 .clock .dl { display: block; width: clamp(90px, 12vw, 160px); height: 3px; border-radius: 2px; background: var(--rule);
   margin-top: 6px; overflow: hidden; visibility: hidden; }
 .clock.live .dl { visibility: visible; }
-.clock .dl i { display: block; height: 100%; width: 0; background: var(--ink); transition: width .3s linear; }
+.clock .dl i { display: block; height: 100%; width: 100%; background: var(--ink); transform: scaleX(0); transform-origin: 0 50%;
+  transition: transform .25s var(--ease); }
 .js .clock { opacity: 0; transition: opacity .45s ease 1.6s; }
 .js .map.is-in .clock { opacity: 1; }
 .map .iso { font: 500 23px var(--body); fill: var(--ink); fill-opacity: .72; }
@@ -805,7 +806,7 @@ python -m wxbot run --config config/example.yaml --mode paper --minutes 30</code
     const showTime = () => {
       const idx = (vid.currentTime * FPS / PER_HOUR) % 24, et = START + idx, h = Math.floor(et) % 24;
       clk.textContent = ((h % 12) || 12) + (h < 12 ? " AM" : " PM");
-      dlf.style.width = (idx / 24 * 100).toFixed(1) + "%";
+      dlf.style.transform = "scaleX(" + (idx / 24).toFixed(4) + ")";
     };
     vid.addEventListener("loadedmetadata", () => { try { vid.currentTime = 8 * PER_HOUR / FPS; } catch (e) { /* fine */ } }, { once: true });
     let live = false;
