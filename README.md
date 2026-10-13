@@ -13,10 +13,10 @@ its estimate. It has traded real money since October 2026.
 
 [![tests](https://github.com/shourya0mehta/isotherm/actions/workflows/tests.yml/badge.svg)](https://github.com/shourya0mehta/isotherm/actions/workflows/tests.yml)
 
-![Map of the day's high across the lower 48 on October 11, 2026, with the official high at the 24 cities Isotherm trades](docs/assets/map-labeled.webp)
+![Map of the day's high across the lower 48, with the official high in the 24 cities Isotherm trades](docs/assets/map-labeled.webp)
 
-<sub>The day's high across the lower 48 on Sunday, October 11, 2026, from NOAA's 3 km HRRR model, with the official
-National Weather Service high in each city Isotherm trades. Lines are isotherms, 10 °F apart.</sub>
+<sub>The day's high across the lower 48 from NOAA's 3 km HRRR model, with the official high in each city Isotherm
+trades. Lines are isotherms, 10 °F apart.</sub>
 
 ## The dashboard
 
@@ -26,8 +26,6 @@ derived from a passcode by PBKDF2), and the page decrypts them on the device, so
 laptop running anywhere.
 
 ![The Isotherm dashboard on a desktop and a phone, shown with made-up sample data](docs/assets/dashboard-combo.webp)
-
-<sub>Shown with made-up sample data. The live dashboard is private.</sub>
 
 ## A day in the market
 
