@@ -48,8 +48,8 @@ button { font: inherit; color: inherit; }
 .wrap { max-width: 72rem; margin: 0 auto; padding-inline: clamp(16px, 4vw, 40px); }
 
 /* reveal on scroll (the brief asks for it; one easing, short stagger) */
-.js [data-reveal] { opacity: 0; transform: translateY(18px);
-  transition: opacity .55s var(--ease), transform .65s var(--ease); transition-delay: calc(var(--i, 0) * 60ms); }
+.js [data-reveal] { opacity: 0; transform: translateY(12px);
+  transition: opacity .4s var(--ease), transform .45s var(--ease); transition-delay: calc(var(--i, 0) * 60ms); }
 .js [data-reveal].is-in { opacity: 1; transform: none; }
 
 /* top bar */
@@ -154,7 +154,7 @@ h1 { font-family: var(--display); font-weight: 500; font-size: clamp(36px, 4.4vw
   margin-top: 6px; overflow: hidden; visibility: hidden; }
 .clock.live .dl { visibility: visible; }
 .clock .dl i { display: block; height: 100%; width: 0; background: var(--ink); transition: width .3s linear; }
-.js .clock { opacity: 0; transition: opacity .6s ease 1.6s; }
+.js .clock { opacity: 0; transition: opacity .45s ease 1.6s; }
 .js .map.is-in .clock { opacity: 1; }
 .map .iso { font: 500 23px var(--body); fill: var(--ink); fill-opacity: .72; }
 .map .city { font: 500 27px var(--body); fill: var(--ink); paint-order: stroke; stroke: rgba(255, 255, 255, .9);
@@ -244,6 +244,7 @@ h3 { font-size: 19px; font-weight: 600; margin: 0 0 8px; line-height: 1.3; }
 .ibtn { min-height: 38px; padding: 0 14px; border-radius: 9px; border: 1.5px solid var(--rule); background: var(--card);
   cursor: pointer; font-size: 14px; font-weight: 600; color: var(--ink-2); transition: border-color .2s, transform .2s var(--ease); }
 .ibtn:hover { border-color: var(--ink-3); transform: translateY(-1px); }
+.ibtn:active { background: var(--wash); border-color: var(--ink-3); transform: none; transition-duration: 0s; }
 
 /* viz: shared */
 .viz { min-width: 0; }
@@ -342,15 +343,15 @@ h3 { font-size: 19px; font-weight: 600; margin: 0 0 8px; line-height: 1.3; }
   position: relative; }
 .day::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 2px; background: var(--ink);
   transform-origin: 0 50%; }
-.js .day::before { transform: scaleX(0); transition: transform 1.4s var(--ease) .1s; }
+.js .day::before { transform: scaleX(0); transition: transform .45s var(--ease); }
 .js .day.is-in::before { transform: scaleX(1); }
 .day li { position: relative; padding: 20px 18px 0 0; }
 .day li::before { content: ""; position: absolute; top: -7px; left: 0; width: 12px; height: 12px; border-radius: 50%;
   background: var(--paper); border: 2px solid var(--ink); transition: transform .3s var(--ease), background .3s; }
 .day li:hover::before { transform: scale(1.35); background: var(--warm); border-color: var(--warm); }
 .day li.settle::before { background: var(--ink); }
-.js .day li { opacity: 0; transform: translateY(16px); transition: opacity .6s var(--ease), transform .7s var(--ease);
-  transition-delay: calc(.25s + var(--i) * 170ms); }
+.js .day li { opacity: 0; transform: translateY(12px); transition: opacity .3s var(--ease), transform .3s var(--ease);
+  transition-delay: calc(var(--i) * 30ms); }
 .js .day.is-in li { opacity: 1; transform: none; }
 .day time { display: block; font-family: var(--display); font-size: 21px; font-weight: 600; line-height: 1.2; margin-bottom: 6px; }
 .day p { margin: 0; font-size: 15px; color: var(--ink-2); line-height: 1.5; }
@@ -368,7 +369,7 @@ section.band .shots .phone { border-color: #3a4a56; box-shadow: 0 28px 54px -24p
 .shots .phone { position: absolute; right: 0; bottom: -28px; width: clamp(150px, 24vw, 280px); height: auto;
   border: 7px solid var(--ink); border-radius: 30px; background: var(--paper);
   box-shadow: 0 18px 40px -18px rgba(20, 32, 41, .45); will-change: transform; }
-.js .shots .phone { opacity: 0; transition: opacity .8s var(--ease) .35s; }
+.js .shots .phone { opacity: 0; transition: opacity .45s var(--ease) .2s; }
 .js .shots.is-in .phone { opacity: 1; }
 
 /* numbers */
