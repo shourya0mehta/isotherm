@@ -276,16 +276,17 @@ h3 { font-size: 19px; font-weight: 600; margin: 0 0 8px; line-height: 1.3; }
 /* viz 2: forecast */
 .chart { position: relative; height: 230px; display: grid; grid-template-columns: repeat(13, minmax(0, 1fr)); gap: 6px;
   align-items: end; border-bottom: 1.5px solid var(--ink); }
-.chart .col { position: relative; height: 100%; display: flex; align-items: flex-end; justify-content: center; }
-.chart .b { width: 100%; border-radius: 5px 5px 0 0; background: var(--cool); height: 0;
-  transition: height .7s var(--ease), background .3s; }
+.chart .col { position: relative; height: 100%; overflow: hidden; }
+.chart .b { position: absolute; inset: 0; border-radius: 5px 5px 0 0; background: var(--cool); transform: translateY(100%);
+  transition: transform .45s var(--ease), background .3s; }
 .chart .b.top { background: var(--ink); }
-.chart .pct { position: absolute; left: 0; right: 0; text-align: center; font-size: 12.5px; font-weight: 600; color: var(--ink);
-  transition: bottom .7s var(--ease), opacity .3s; }
+.chart .pct { position: absolute; left: 0; right: 0; bottom: 0; text-align: center; font-size: 12.5px; font-weight: 600; color: var(--ink);
+  transition: transform .45s var(--ease), opacity .3s; }
 .xl { display: grid; grid-template-columns: repeat(13, minmax(0, 1fr)); gap: 6px; font-size: 12.5px; color: var(--ink-3);
   text-align: center; margin-top: 6px; }
 .passed { position: absolute; left: 0; top: 0; bottom: 0; background: repeating-linear-gradient(135deg, rgba(107, 120, 131, .14) 0 6px, transparent 6px 12px);
-  border-right: 1.5px dashed var(--ink-3); width: 0; opacity: 0; transition: width .6s var(--ease), opacity .4s; display: flex; align-items: flex-start; }
+  border-right: 1.5px dashed var(--ink-3); width: 0; opacity: 0; transition: opacity .3s var(--ease); display: flex; align-items: flex-start;
+  pointer-events: none; }
 .passed span { font-size: 12.5px; color: var(--ink-2); padding: 6px 8px; white-space: nowrap; }
 
 /* viz 3: blend */
@@ -912,14 +913,14 @@ python -m wxbot run --config config/example.yaml --mode paper --minutes 30</code
     $$(".col", fchart).forEach((c, i) => {
       const v = pm[DEG[i]] || 0, h = Math.min(100, v / mx * 100);
       const b = c.querySelector(".b"), t = c.querySelector(".pct");
-      b.style.height = h + "%"; b.classList.toggle("top", DEG[i] === top);
-      t.textContent = v >= 3 ? v + "%" : ""; t.style.bottom = "calc(" + h + "% + 4px)";
+      b.style.transform = "translateY(" + (100 - h) + "%)"; b.classList.toggle("top", DEG[i] === top);
+      t.textContent = v >= 3 ? v + "%" : ""; t.style.transform = "translateY(" + (-(h / 100) * c.clientHeight - 4).toFixed(1) + "px)";
     });
     const cols = $$(".col", fchart);
     if (S.preset === "pm") {
       const r0 = fchart.getBoundingClientRect(), r83 = cols[DEG.indexOf(83)].getBoundingClientRect();
       passed.style.width = (r83.left - r0.left - 3) + "px"; passed.style.opacity = 1;
-    } else { passed.style.width = "0px"; passed.style.opacity = 0; }
+    } else { passed.style.opacity = 0; }
     $$(".seg button").forEach((x) => x.setAttribute("aria-pressed", String(x.dataset.preset === S.preset)));
   };
   $$(".seg button").forEach((x) => x.addEventListener("click", () => { touch(); S.preset = x.dataset.preset; drawForecast(); }));
